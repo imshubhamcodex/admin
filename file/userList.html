@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>User List</title>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.6/css/all.css">
+
+	<!-- firebase -->
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-storage.js"></script>
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyBv8smcSq6KUFImtYKIAWWZ0PgE3FDqS3s",
+			authDomain: "dev-roomlelo.firebaseapp.com",
+			databaseURL: "https://dev-roomlelo.firebaseio.com",
+			projectId: "dev-roomlelo",
+			storageBucket: "dev-roomlelo.appspot.com",
+			messagingSenderId: "450187201766",
+			appId: "1:450187201766:web:9a14dcd60b4b5101e93f27"
+		};
+		firebase.initializeApp(firebaseConfig);
+
+	</script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+		<nav class="navbar navbar-dark bg-primary text-center" style="margin-bottom: 20px;">
+		<p class="navbar-brand " style="font-size: 2.0rem; margin:0 auto;"><i class="fa fa-cog" aria-hidden="true"></i> Roomlelo Admin site</p>
+	</nav>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-2">
+				<ul class="list-group" style="font-size: 15px;">
+					<a id="userCount" style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active" onclick="location.reload()">Users List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="serviceRequest.html">Services Requests</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="rentDue.html">Rent Due List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="rentCollection.html">Rent Collection List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="securityDeposite.html">Security Deposite</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item  " href="bookProperty.html">Book Property</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " href="reservationDetails.html">Reservation Details</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item  " href="createID.html">Create PM Id's</a>
+				</ul>
+			</div>
+			<div class="col-9" style="font-size: 15px;margin:0 auto;">
+				<ul style="margin: 0 auto;display: block;text-align: center;">
+					<li style="display: inline;padding-right:10px"><button id="users_btn" onclick="regUsers()" class="btn btn-info" style="font-size: 15px;" >Registered Users</button></li>
+					<li style="display: inline;padding-left: 10px; "><button id="request_btn" onclick="unregUsers()" class="btn btn-info" style="font-size: 15px;" >Unregistered Users</button></li>
+				</ul>
+				<div id="userList">
+					<!-- from db -->
+				</div>
+				<button type="button" id="modal-box" style="display: none;" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Small Modal</button>
+
+				<!-- Modal -->
+				<div class="modal fade" id="myModal" role="dialog">
+					<div class="modal-dialog modal-sm">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" style="float:right" data-dismiss="modal">&times;</button>
+
+							</div>
+							<div class="modal-body">
+								<form onsubmit="return false">
+
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Owner ID</span>
+										</div>
+										<select id="ownerId" style="border:1px solid green;width:75%;height:36px;padding-left: 5px" required>
+											<!-- data from db -->
+										</select>
+									</div>
+
+									<br>
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Property ID</span>
+										</div>
+										<select id="propId" style="border:1px solid green;width:75%;height:36px;padding-left: 5px" required>
+											<!-- data from db -->
+										</select>
+									</div>
+									<br>
+
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Room Type</span>
+										</div>
+										<select id="roomType" style="border:1px solid green;width:75%;height:36px;padding-left: 5px" required>
+											<option value="entire house">Entire House</option>
+											<option value="private room">Private Room</option>
+											<option value="1 Sharing">1 Sharing</option>
+											<option value="2 Sharing">2 Sharing</option>
+											<option value="3 Sharing">3 Sharing</option>
+											<option value="4 Sharing">4 Sharing</option>
+											<option value="5 Sharing">5 Sharing</option>
+											<option value="6 Sharing">6 Sharing</option>
+											<option value="7 Sharing">7 Sharing</option>
+										</select>
+									</div>
+									<br>
+
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Move in Date</span>
+										</div>
+										<input type="date" required  class="form-control" id="registeredDate" required style="height:34px;font-size: 12px;">
+									</div>
+								</form>
+							</div>
+							<div class="modal-footer">
+								<button type="Submit" onclick="registerUser()" class="btn btn-danger" data-dismiss="modal">Submit</button>
+								<button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+</body>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
+
+<script>
+	window.onload = function(){
+	showUsers(); // show all users
+	// get all owners id
+	firebase.firestore().collection('ownerProfile').get().then( res =>{
+		res.forEach( function(docs) {
+			var newEle = `
+			<option value="${docs.id}">${docs.id}</option>
+			`
+			document.getElementById('ownerId').innerHTML += newEle;
+		});
+	})
+
+	// geyt all properties id
+	firebase.firestore().collection('properties').get().then( res =>{
+		res.forEach( function(docs) {
+			var newEle = `
+			<option value="${docs.id}">${docs.id}</option>
+			`
+			document.getElementById('propId').innerHTML += newEle;
+		});
+	})
+}
+
+window.onclick =  async function(e){
+
+
+	if(e.target.id.substring(e.target.id.length-3,e.target.id.length)!=='Div' && e.target.id.substring(e.target.id.length-11,e.target.id.length === 'userDetails')&& e.target.type!=="checkbox" && e.target.type!=="date"){
+		var ID = e.target.id.substring(0,e.target.id.length-11);
+		localStorage.setItem('userQueryID', ID);
+		window.open("userDetails.html","_blank")
+		console.log()
+	}
+
+
+	if(checkBoxID.indexOf(e.target.id)!==-1)
+	{
+		if(document.getElementById(e.target.id).checked){
+
+			document.getElementById('modal-box').click();
+			console.log('now checked');
+			userSelected = e.target.id;
+
+		}
+		else{
+
+			firebase.firestore().collection('registeredUser').doc(e.target.id).delete().then( ()=>{
+				console.log('Deleted')
+				document.getElementById(e.target.id+'Reg').textContent ="Unregistered";
+			})
+
+
+			console.log('now unchecked')
+
+		}
+	}
+	
+}
+
+var userSelected; // user which is going to registered;
+
+function registerUser(){
+	if(document.getElementById('registeredDate').value === ""){
+
+		alert("Enter valid date");
+		return;
+	}
+
+	var myFirebaseFirestoreTimestampFromDate = firebase.firestore.Timestamp.fromDate(new Date(document.getElementById('registeredDate').value));
+
+	firebase.firestore().collection('registeredUser').doc(userSelected).set({
+
+		ownerId: document.getElementById('ownerId').value,
+		propertyId: document.getElementById('propId').value,
+		registered: true,
+		roomType: document.getElementById('roomType').value,
+		seconds: myFirebaseFirestoreTimestampFromDate.seconds
+
+	})
+}
+
+var usersID = []; // all users id
+var checkBoxID = []; // id of all check box
+var countUsers = 0;
+
+function regUsers(){  // show reg users
+	countUsers = 0;
+	checkBoxID.forEach( function(element, index) {
+		if(document.getElementById(element).checked == true){
+			document.getElementById(element+'Div').style.display = 'block';
+			countUsers++;
+			document.getElementById('userCount').textContent = 'Users List ('+ countUsers +')';
+		}else{
+			document.getElementById(element+'Div').style.display = 'none';
+		}
+	});
+}
+
+function unregUsers(){   // show un reg users
+	countUsers = 0;
+	checkBoxID.forEach( function(element, index) {
+		if(document.getElementById(element).checked == true){
+			document.getElementById(element+'Div').style.display = 'none';
+		}else{
+			document.getElementById(element+'Div').style.display = 'block';
+			countUsers++;
+			document.getElementById('userCount').textContent = 'Users List ('+ countUsers +')';
+		}
+	});
+}
+
+async function showUsers(){ //show all users 
+	usersID = [];  
+	checkBoxID = [];
+	countUsers = 0;
+
+	await firebase.firestore().collection('userProfile').get().then(res =>{
+
+		res.forEach((element) => {
+			usersID.push(element.id)
+		});
+	});
+
+	usersID.forEach( async function(element) {
+
+		var checked = ""
+		var reg;
+		var propID;
+
+		await firebase.firestore().collection('registeredUser').doc(element).get().then(response => {
+
+			if(response.data().registered){
+				checked = "checked";
+				propID = response.data().propertyId;
+
+				if(propID === undefined)
+					propID = " ";
+			}
+			else
+				checked = "";
+
+
+			if(checked)
+				reg = 'Registered';
+			else 
+				reg = 'Unregistered';
+
+		}).catch(err =>{
+			checked = "";
+			if(checked)
+				reg = 'Registered';
+			else 
+				reg = 'Unregistered';
+		})
+
+		// getting users images 
+		await firebase.firestore().collection('userProfile').doc(element).get().then(res =>{
+			var img,flag = false;
+
+			if(res.data().personal === undefined){
+				if((/@/).test(element)){
+					img = "https://img.favpng.com/21/13/5/user-profile-default-computer-icons-network-video-recorder-png-favpng-7dPZA8WRdY80Uw3bdMWkEN4fR.jpg";
+				}
+				else{
+					img = res.data().image;
+				}
+			}
+			else{
+				if((/@/).test(element)){
+					flag = true;
+					firebase.storage().ref("userImage/"+element).getDownloadURL().then(url =>{
+						img =  url;
+						if(propID === undefined)
+							propID = " ";
+						newElement(img,res,checked,reg,element,propID); // this function is requried because we are fetching image from storage
+					});                                          // this take much time to fetch
+				}else{
+					img = res.data().image;
+				}
+			}
+
+
+
+
+			if(!flag){   // this flage we need to create new element if we got images from user_profile or gmail loggin
+				checkBoxID.push(element);
+				countUsers++;
+				document.getElementById('userCount').textContent = 'Users List ('+ countUsers +')';
+				if(propID === undefined)
+					propID = " ";
+
+				var newEle = `
+
+				<div id=${element+"Div"} style="box-shadow: 1px 5px 5px rgba(0,0,0,0.5);height:80px;width:100%;margin:20px auto;background-color: white;border-right: 10px;position: relative;">
+				<img src="${img}"  style="margin:0;vertical-align: middle;height: 50%;margin-top:17px;margin-left: 30px;" alt="">
+				<h4 style="position:absolute;top:26%;left:25%;">${res.data().name}</h4>
+				<h5 style="position:absolute;top:30%;left:48%;">ID: ${element}</h5>
+
+				<label style="margin-top:28px;margin-left:30px;position: absolute;" class="switch">
+				<input type="checkbox" id="${element}" ${checked}>
+				<span class="slider"></span>
+				</label>
+				<h6 id="${element+'Reg'}" style="position:absolute;margin-top:-23px;margin-left:160px;">${reg}</h6>
+
+				<i id="${element+'userDetails'}" style="float:right;position:absolute;top:50%;right:5%;transform: translate(0,-50%);" class="fa fa-chevron-right next" aria-hidden="true"></i>
+				
+				<h5 id="${element+'propID'}" style="position:absolute;top:38%;right:7%;transform:translate(0,-50%);color:red;">${propID}</h5>
+
+				</div>
+
+				`
+
+
+				document.getElementById('userList').innerHTML += newEle; 
+			}
+		})
+	});
+
+
+
+
+}
+
+function newElement(img,res,checked,reg,element,propID ) {  //this is to fetch image from storage
+
+	checkBoxID.push(element);
+
+	countUsers++;
+	document.getElementById('userCount').textContent = 'Users List ('+ countUsers +')';
+
+	var newEle = `
+
+	<div id=${element+"Div"} style="box-shadow: 1px 5px 5px rgba(0,0,0,0.5);height:80px;width:100%;margin:20px auto;background-color: white;border-right: 10px;position: relative;">
+	<img src="${img}"  style="margin:0;vertical-align: middle;height: 50%;margin-top:17px;margin-left: 30px;" alt="">
+	<h4 style="position:absolute;top:25%;left:26%;">${res.data().name}</h4>
+	<h5 style="position:absolute;top:30%;left:48%;">ID: ${element}</h5>
+
+	<label style="margin-top:28px;margin-left:25px;position: absolute;" class="switch">
+	<input type="checkbox" id="${element}" ${checked}>
+	<span class="slider"></span>
+	</label>
+	<h6 id="${element+'Reg'}" style="position:absolute;margin-top:-23px;margin-left:160px;">${reg}</h6>
+
+	<i id="${element+'userDetails'}" style="float:right;position:absolute;top:50%;right:5%;transform: translate(0,-50%);" class="fa fa-chevron-right next" aria-hidden="true"></i>
+
+	<h5 id="${element+'propID'}" style="position:absolute;top:38%;right:7%;transform:translate(0,-50%);color:red;">${propID}</h5>
+
+	</div>
+
+
+
+	`
+	document.getElementById('userList').innerHTML += newEle;
+}
+
+
+</script>
+<style type="text/css" media="screen">
+	
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 50px;
+		height: 23px;
+	}
+
+	.switch input { 
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #ccc;
+		-webkit-transition: .4s;
+		transition: .4s;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: "";
+		height: 15px;
+		width: 15px;
+		left: 4px;
+		bottom: 4px;
+		background-color: white;
+		-webkit-transition: .4s;
+		transition: .4s;
+	}
+
+	input:checked + .slider {
+		background-color: #2196F3;
+	}
+
+	input:focus + .slider {
+		box-shadow: 0 0 1px #2196F3;
+	}
+
+	input:checked + .slider:before {
+		-webkit-transform: translateX(26px);
+		-ms-transform: translateX(26px);
+		transform: translateX(26px);
+	}
+</style>
+</html>

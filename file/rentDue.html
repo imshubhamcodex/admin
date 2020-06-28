@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Rent Due</title>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+
+
+
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.6/css/all.css">
+
+	<!-- firebase -->
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-storage.js"></script>
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyBv8smcSq6KUFImtYKIAWWZ0PgE3FDqS3s",
+			authDomain: "dev-roomlelo.firebaseapp.com",
+			databaseURL: "https://dev-roomlelo.firebaseio.com",
+			projectId: "dev-roomlelo",
+			storageBucket: "dev-roomlelo.appspot.com",
+			messagingSenderId: "450187201766",
+			appId: "1:450187201766:web:9a14dcd60b4b5101e93f27"
+		};
+		firebase.initializeApp(firebaseConfig);
+	</script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-dark bg-primary text-center" style="margin-bottom: 20px;">
+		<p class="navbar-brand " style="font-size: 2.0rem; margin:0 auto;"><i class="fa fa-cog" aria-hidden="true"></i> Roomlelo Admin site</p>
+	</nav>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-2">
+				<ul class="list-group" style="font-size: 15px;">
+					<a  style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="userList.html" >Users List</a>
+					<a   style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="serviceRequest.html" >Services Requests</a>
+					<a id="btndue" style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active"  onclick="location.reload()">Rent Due List</a>
+					<a   style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="rentCollection.html">Rent Collection List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="securityDeposite.html">Security Deposite</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item  " href="bookProperty.html">Book Property</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " href="reservationDetails.html">Reservation Details</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item  " href="createID.html">Create PM Id's</a>
+				</ul>
+			</div>
+			<div class="col-9"  style="font-size: 15px;margin:0 auto;" >
+
+				<!-- Button trigger modal -->
+				<button type="button" style="display: none;" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+					Launch modal
+				</button>
+
+				<!-- Modal -->
+				<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLongTitle">Payment Details</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<form accept-charset="utf-8" onsubmit="return false">
+								<div class="modal-body">
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Date</span>
+										</div>
+										<input type="date"  class="form-control" id="datePaid" required style="height:34px;font-size: 12px;">
+									</div>
+									<br>
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Amount ₹:</span>
+										</div>
+										<input type="number"  class="form-control" id="amountPaid" required style="height:34px;font-size: 12px;">
+									</div>
+									<br>
+									<select id="paymedium" class="form-control">
+										<option value="" disabled selected>Mode of transaction</option>
+										<option value="cash">Cash</option>
+										<option value="online">Online</option>
+									</select>	
+
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									<button type="submit" onclick="payRent()" class="btn btn-danger">Submit</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+
+
+				<!-- Button trigger modal -->
+				<button type="button" style="display: none;" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter00">
+					Launch modal
+				</button>
+
+				<!-- Modal -->
+				<div class="modal fade" id="exampleModalCenter00" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLongTitle">Set Due</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<form accept-charset="utf-8" onsubmit="return false">
+								<div class="modal-body">
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Last Date</span>
+										</div>
+										<input type="date" id="lastDueDate"  class="form-control" required style="height:34px;font-size: 12px;">
+									</div>
+									<br>
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Amount ₹:</span>
+										</div>
+										<input type="number" id="amtDue"  class="form-control" required style="height:34px;font-size: 12px;">
+									</div>
+									<br>
+									<select id="userTosetDue" class="form-control">
+										<option value="" disabled selected>Set User ID</option>
+										
+									</select>
+
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									<button type="submit" onclick="submitDue()" class="btn btn-danger">Submit</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+
+				<div id="rentDue">
+					<button class="btn btn-danger" style="display: block;margin:0 auto; font-size: 15px;" data-toggle="modal" data-target="#exampleModalCenter00" >Set Due Amount</button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+
+	<script>
+		showRentDue()
+		var arrDueCheckbox = [];
+		var dueRentArr = [];
+		var uid = [];
+		async function showRentDue(){
+			arrDueCheckbox = [];
+			dueRentArr = [];
+			uid = [];
+
+
+			document.getElementById('rentDue').innerHTML = `
+			<button class="btn btn-danger" style="display: block;margin:0 auto;font-size: 15px;" data-toggle="modal" data-target="#exampleModalCenter00" >Set Due Amount</button>
+			`;
+
+			await firebase.firestore().collection('rentDue').get().then(res=>{
+				res.docs.forEach( function(element, index) {
+					uid.push(element.id)
+				});
+			})
+
+			
+
+			for(let i=0;i<uid.length;i++){
+
+				await firebase.firestore().collection('rentDue').doc(uid[i]).get().then(res =>{
+					(res.data().due).forEach( (ele) => {
+
+						var x = {
+								sec: ele.lastDate.seconds, //second of timestamp
+								amount: ele.amount,
+								total: ele.total,
+								date: ele.lastDate.toDate().toString().substring(0,10),
+								month:  ele.month.toUpperCase(),
+								vn: ele.vn,
+								name: ele.name,
+								lastDate: ele.lastDate,
+								userid: uid[i]
+							}
+							dueRentArr.push(x);
+						});
+
+				});
+
+			}
+
+			dueRentArr.sort(function(a,b){ return Number(b.sec) - Number(a.sec)});
+			dueRentArr.forEach((element, index) => {
+				if(element.date.charAt(9)=='1')
+					element.date += "st";
+				else if(element.date.charAt(9)=='2')
+					element.date += "nd";
+				else if(element.date.charAt(9)=='3')
+					element.date += "rd";
+				else
+					element.date += "th";
+
+				var newEle =`
+				<div id=${element.userid} style="width:95%;height:105px;background-color:white;border-radius:0px;border:1px solid #ddd;box-shadow:0px 2px 5px rgba(0,0,0,0.6);margin:12px auto;position:relative;">
+				<div style="border-left: 2px solid rgb(219, 219, 219);height:53px;position:absolute;top:50%;margin-left:30px;transform:translate(0%,-50%)"></div>
+
+				<span id="${element.vn}" style="color:black; font-size:13px; width:100%; height:23px; background:white; display:block;box-shadow:0px 2px 2px rgba(0,0,0,0.7);"><span style="margin-left:12px;font-family:Montserrat;font-weight:600;font-size:15px;color:red">Due VN: ${element.vn} <span style="margin-left:30px;"> </span> ID: ${element.userid}
+				</span>
+				<button data-toggle="modal" data-target="#exampleModalCenter"  class="btn btn-danger" style="padding:0;height:23px;margin-right:15px;padding-left:5px;padding-right:5px; float:right;" id="${element.sec}">Paid!</button>
+				</span>
+
+
+
+				<h6 style="margin-left:40px;margin-top:14px;font-family:Montserrat;font-weight:700"><i class="fa fa-circle-o" aria-hidden="true" style="position:absolute;margin-left:-16px;color:#3fb6c6;background-color:white;"></i>Rent ${element.month} <span style="float:right;margin-right:10px;"> ₹ ${element.amount}</span></h6>
+				<p style="margin-top:-7px;margin-left:40px;font-size:13px;position:relative;"><span style="font-family:Montserrat;"> Last date ${element.date}</span></p>
+				<hr style="margin-top:10px;margin-bottom:0;">
+				<p style="margin-left:15px; font-family:Montserrat;font-weight:600; font-size:15px;">Total: ₹ ${element.total}<span style="float:right;margin-right:10px;"></span></p>
+				</div>
+				`
+				arrDueCheckbox.push(element.sec)
+				document.getElementById('rentDue').innerHTML += newEle;
+			});
+
+
+			
+			document.getElementById('btndue').textContent = "Rent Due List ("+dueRentArr.length.toString()+")"
+
+
+		}
+
+
+		async function payRent(){
+
+			if(document.getElementById('amountPaid').value===""){
+				alert('Enter Amount')
+				return;
+			}
+			var paidDate = document.getElementById('datePaid').value; 
+
+			var myFirebaseFirestoreTimestampFromDate = firebase.firestore.Timestamp.fromDate(new Date());
+
+			
+			var totalamt;
+			await firebase.firestore().collection('rentDue').doc(userID).get().then(res =>{
+				totalamt = res.data().total
+			})
+
+			var currentIDArr = [];
+
+			await firebase.firestore().collection('rentDue').doc(userID).get().then(res =>{
+				(res.data().due).forEach( (ele) => {
+
+					var x = {
+								sec: ele.lastDate.seconds, //second of timestamp
+								amount: ele.amount,
+								total: ele.total,
+								date: ele.lastDate.toDate().toString().substring(0,10),
+								month:  ele.month.toUpperCase(),
+								vn: ele.vn,
+								name: ele.name,
+								lastDate: ele.lastDate,
+								userid: userID
+							}
+							currentIDArr.push(x);
+						});
+
+			});
+
+
+
+
+			await firebase.firestore().collection('rentPaid').doc(userID).get().then(res =>{
+				if(res.exists)
+				{
+					firebase.firestore().collection('rentPaid').doc(userID).update({
+						paid:firebase.firestore.FieldValue.arrayUnion({
+							amount:document.getElementById('amountPaid').value,
+							total:document.getElementById('amountPaid').value,
+							vn: vnNumber,
+							date: firebase.firestore.Timestamp.fromDate(new Date(paidDate)),
+							mode: document.getElementById('paymedium').value,
+							month: myFirebaseFirestoreTimestampFromDate.toDate().toString().substring(4,7).toUpperCase()
+
+						})
+					})
+					console.log('Done')
+
+				}else{
+					firebase.firestore().collection('rentPaid').doc(userID).set({
+
+						paid:firebase.firestore.FieldValue.arrayUnion({
+							amount:document.getElementById('amountPaid').value,
+							total:document.getElementById('amountPaid').value,
+							vn: vnNumber,
+							date: firebase.firestore.Timestamp.fromDate(new Date(paidDate)),
+							mode: document.getElementById('paymedium').value,
+							month: myFirebaseFirestoreTimestampFromDate.toDate().toString().substring(4,7).toUpperCase()
+						})
+					})
+
+					console.log('Done')
+				}
+
+			})
+
+			var due =  currentIDArr.filter( el => el.vn !== vnNumber.toString());
+
+			await firebase.firestore().collection('rentDue').doc(userID).update({
+				due: firebase.firestore.FieldValue.delete()
+			})
+
+
+
+
+			for(let i=0; i<due.length; i++){
+
+				await firebase.firestore().collection('rentDue').doc(userID).get().then(res =>{
+					if(res.exists)
+					{
+						firebase.firestore().collection('rentDue').doc(userID).update({
+							due:firebase.firestore.FieldValue.arrayUnion({
+								amount: due[i].amount,
+								total: due[i].total,
+								month: due[i].month,
+								lastDate: due[i].lastDate.toDate(),
+								name:due[i].name,
+								vn:due[i].vn
+							})
+						})
+						firebase.firestore().collection('rentDue').doc(userID).update({
+							total:document.getElementById('amtDue').value
+						})
+
+					}else{
+						firebase.firestore().collection('rentDue').doc(userID).set({
+							due:firebase.firestore.FieldValue.arrayUnion({
+								amount: due[i].amount,
+								total: due[i].total,
+								month: due[i].month,
+								lastDate: due[i].lastDate.toDate(),
+								name:due[i].name,
+								vn:due[i].vn
+							})
+						})
+					}
+
+
+				})
+
+			}
+
+			firebase.firestore().collection('rentDue').doc(userID).update({
+				total : totalamt
+			})
+
+
+
+			console.log(due)
+
+			alert('Updated')
+
+
+
+		}
+
+
+
+		async function submitDue(){
+
+			if(document.getElementById('amtDue').value==="" && document.getElementById('lastDueDate').value==="" ){
+				alert('Invalid Entry')
+				return;
+			}
+
+			var userID = document.getElementById('userTosetDue').value;
+
+			var myFirebaseFirestoreTimestampFromDate = firebase.firestore.Timestamp.fromDate(new Date(document.getElementById('lastDueDate').value.toString()));
+
+			let lastDate = myFirebaseFirestoreTimestampFromDate.toDate()
+			let name = "";
+			let phone = "";
+
+			await firebase.firestore().collection('userProfile').doc(userID).get().then( res =>{
+				name = res.data().name;
+				phone = res.data().personal.mobile
+			})
+
+
+			
+
+			firebase.firestore().collection('rentDue').doc(userID).get().then(res =>{
+				if(res.exists)
+				{
+					firebase.firestore().collection('rentDue').doc(userID).update({
+						due:firebase.firestore.FieldValue.arrayUnion({
+							amount:document.getElementById('amtDue').value,
+							total:document.getElementById('amtDue').value,
+							month: lastDate.toString().substring(4, 7).toUpperCase(),
+							lastDate: lastDate,
+							name:name,
+							vn:"RLLVNSO"+ Math.floor(Math.random()*10000000).toString()
+						})
+					})
+
+					firebase.firestore().collection('rentDue').doc(userID).update({
+						total:document.getElementById('amtDue').value
+					})
+
+								var msg = `
+
+								Your rent for this month is due Rs.${  document.getElementById('amtDue').value }
+								Please pay before 5th of ${ lastDate.toString().substring(4, 7) }
+								To avoid late fine fees
+								Please ignore if already paid.
+
+								`
+								if(phone!=="")
+									sendSMS(phone,msg)
+
+
+
+							}else{
+								firebase.firestore().collection('rentDue').doc(userID).set({
+									due:firebase.firestore.FieldValue.arrayUnion({
+										amount:document.getElementById('amtDue').value,
+										total:document.getElementById('amtDue').value,
+										month: lastDate.toString().substring(4, 7).toUpperCase(),
+										lastDate: lastDate,
+										name:name,
+										vn:"RLLVNSO"+ Math.floor(Math.random()*10000000).toString()
+									})
+								})
+
+								firebase.firestore().collection('rentDue').doc(userID).update({
+									total:document.getElementById('amtDue').value
+								})
+
+
+								var msg = `
+
+								Your rent for this month is due Rs.${  document.getElementById('amtDue').value+" " } Please pay before 5th of ${ lastDate.toString().substring(4, 7) } To avoid late fine fees, Please ignore if already paid.
+
+								`
+								if(phone!=="" && phone!=undefined)
+									sendSMS(phone,msg)
+
+							}
+
+							alert("Updated")
+
+						})
+
+
+		}
+		var vnNumber;
+		var userID;
+		window.onclick = function(e){
+			if(e.target.textContent==="Paid!")
+			{
+
+				vnNumber = e.target.parentNode.id;
+				userID = e.target.parentNode.parentNode.id
+			}
+
+
+		}
+		window.onload = async function(){
+			
+				// get all owners id
+				firebase.firestore().collection('registeredUser').get().then( res =>{
+					res.forEach( function(docs) {
+						var newEle = `
+						<option value="${docs.id}">${docs.id}</option>
+						`
+						document.getElementById('userTosetDue').innerHTML += newEle;
+					});
+				})
+
+			}
+
+			function sendSMS(num,msg){
+				var settings = {
+					"async": true,
+					"crossDomain": true,
+					"url": `https://www.fast2sms.com/dev/bulk?authorization=bLhTVlxWKv8sYJOynkBMCQPU2meNS3uAXjrZ5D47c6gqpi0a1obPWLc8ywd2tAZ1YgjN9GSBC5HnF0VI&sender_id=ALERT&message=${msg}&language=english&route=p&numbers=${num}`,
+					"method": "GET"
+				}
+
+				$.ajax(settings).done(function (response) {
+					console.log(response);
+					return;
+				});
+			}
+
+		</script>
+		<style type="text/css">
+			@import url('https://fonts.googleapis.com/css?family=Montserrat');
+			a{
+				cursor: pointer;
+				color:grey;
+			}
+		</style>
+
+	</body>
+	</html>

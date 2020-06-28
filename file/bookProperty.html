@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Book Property</title>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+
+
+
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.6/css/all.css">
+
+	<!-- firebase -->
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-storage.js"></script>
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyBv8smcSq6KUFImtYKIAWWZ0PgE3FDqS3s",
+			authDomain: "dev-roomlelo.firebaseapp.com",
+			databaseURL: "https://dev-roomlelo.firebaseio.com",
+			projectId: "dev-roomlelo",
+			storageBucket: "dev-roomlelo.appspot.com",
+			messagingSenderId: "450187201766",
+			appId: "1:450187201766:web:9a14dcd60b4b5101e93f27"
+		};
+		firebase.initializeApp(firebaseConfig);
+	</script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+	<nav class="navbar navbar-dark bg-primary text-center" style="margin-bottom: 20px;">
+		<p class="navbar-brand " style="font-size: 2.0rem; margin:0 auto;"><i class="fa fa-cog" aria-hidden="true"></i> Roomlelo Admin site</p>
+	</nav>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-2">
+				<ul class="list-group" style="font-size: 15px;">
+					<a  style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="userList.html" >Users List</a>
+					<a  id="btnserviceReq" style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="serviceRequest.html" >Services Requests</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="rentDue.html">Rent Due List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item"  href="rentCollection.html">Rent Collection List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " href="securityDeposite.html" >Security Deposite</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active" onclick="location.reload()">Book Property</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " href="reservationDetails.html">Reservation Details</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item  " href="createID.html">Create PM Id's</a>
+				</ul>
+			</div>
+			<div class="col-9"  style="font-size: 15px;margin:0 auto;" >
+				
+			</div>
+			<div style="position: absolute;top:50%;left:50%;transform: translate(-50% ,-50%);" >
+				<div class="loader">
+					<div class="inner one"></div>
+					<div class="inner two"></div>
+					<div class="inner three"></div>
+				</div>
+				<h3 id="text" style="margin-top: 250px;margin-left:40px;"></h3>
+				<a id="openlink" href="https://adminbooking.herokuapp.com/" target="_blank" style="display: none;"></a>
+			</div>
+
+		</div>
+
+	</div>
+
+	<script>
+		var text = "Redirecting...";
+		var i=0;
+		type()
+		function type(){
+
+			if(i<text.length){
+				document.getElementById('text').textContent +=text.charAt(i); 
+				i++;
+				setTimeout(type, 50);
+			}else{
+
+				setTimeout(function(){
+					location.replace("./userList.html");
+					document.getElementById('openlink').click();
+				},700)
+			}
+			
+
+		}
+	</script>
+
+
+</body>
+<style type="text/css" media="screen">
+	@import url('https://fonts.googleapis.com/css?family=Montserrat');
+
+	.loader{
+		position: absolute;
+		top: calc(45% - 32px);
+		left:calc(48% - 32px);
+		width:114px;
+		height:114px;
+		border-right: 50%
+		/*perspective :800px;*/
+	}
+
+	.inner{
+		position: absolute;
+		box-sizing: border-box;
+		width: 100%;
+		height: 100%;
+
+		border-radius: 50%;
+
+	}
+	.inner.one{
+		left: 0%
+		top:0%;
+		animation: rotate-one 1s linear infinite;
+		border-bottom: 3px solid #00bfff;
+	}
+
+	.inner.two{
+		right: 0%
+		top:0%;
+		animation: rotate-two 1s linear infinite;
+		border-right:  3px solid #00bfff;
+
+	}
+	.inner.three{
+		right: 0%
+		bottom:0%;
+		animation: rotate-three 1s linear infinite;
+		border-top: 3px solid #00bfff;
+
+	}
+
+	@keyframes rotate-one{
+
+		0%{
+			transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg);
+		}
+		100%{
+			transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg);
+		}
+
+	}
+
+	@keyframes rotate-two{
+
+		0%{
+			transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg);
+		}
+		100%{
+			transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg);
+		}
+
+	}
+
+	@keyframes rotate-three{
+
+		0%{
+			transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg);
+		}
+		100%{
+			transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg);
+		}
+
+	}
+</style>
+</html>

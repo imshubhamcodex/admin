@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Create ID</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.6/css/all.css">
+
+	<!-- firebase -->
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-storage.js"></script>
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyBv8smcSq6KUFImtYKIAWWZ0PgE3FDqS3s",
+			authDomain: "dev-roomlelo.firebaseapp.com",
+			databaseURL: "https://dev-roomlelo.firebaseio.com",
+			projectId: "dev-roomlelo",
+			storageBucket: "dev-roomlelo.appspot.com",
+			messagingSenderId: "450187201766",
+			appId: "1:450187201766:web:9a14dcd60b4b5101e93f27"
+		};
+		firebase.initializeApp(firebaseConfig);
+
+	</script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-dark bg-primary text-center" style="margin-bottom: 20px;">
+		<p class="navbar-brand " style="font-size: 2.0rem; margin:0 auto;"><i class="fa fa-cog" aria-hidden="true"></i> Roomlelo Admin site</p>
+	</nav>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-2">
+				<ul class="list-group" style="font-size: 15px;">
+					<a id="userCount" style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="userList.html"  >Users List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="serviceRequest.html">Services Requests</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="rentDue.html">Rent Due List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="rentCollection.html">Rent Collection List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="securityDeposite.html">Security Deposite</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item  " href="bookProperty.html">Book Property</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " href="reservationDetails.html">Reservation Details</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active " onclick="location.reload()">Create PM Id's</a>
+				</ul>
+			</div>
+			<div class="col-9" style="font-size: 15px;margin:0 auto;">
+				<form onsubmit="return false">
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<label for="inputEmail4">ID</label>
+							<input type="text" class="form-control" id="uid" placeholder="Unique ID">
+						</div>
+						<div class="form-group col-md-6">
+							<label for="inputPassword4">Password</label>
+							<input type="text" class="form-control" id="pass" placeholder="Password">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<label for="inputEmail8">Name</label>
+							<input type="text" class="form-control" id="name" placeholder="Name">
+						</div>
+						<div class="form-group col-md-6">
+							<label for="inputPassword9">Phone Number</label>
+							<input type="number" class="form-control" id="phone" placeholder="Phone Number">
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="inputAddress">Address</label>
+						<input type="text" class="form-control" id="address" placeholder="1234 Main St">
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-4">
+							<label for="">Property Allotted </label>
+							<input type="text" class="form-control" id="propID" placeholder="Property ID">
+						</div>
+					</div>
+					<button type="submit" onclick="submitData()" class="btn btn-primary">Create</button>
+				</form>
+				<br>
+				<h3 style="text-align: center;">Exiting IDs</h3>
+				<div id="pmDiv">
+					
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		var pmIds = [];
+		window.onload = async function(){
+			await firebase.firestore().collection('pmID').get().then(res =>{
+				res.docs.forEach(function(ele){
+					pmIds.push(ele.id)
+				})
+			})
+
+			for(let i = 0 ;i<pmIds.length;i++){
+
+				await firebase.firestore().collection('pmID').doc(pmIds[i]).get().then(res =>{
+					var newEle = `
+
+					<div data-aos="fade-up"  data-aos-offset="120"style="width:95%;height:100%;background-color:white;border-radius:3px;border:1px solid #ddd;box-shadow:0px 2px 5px rgba(0,0,0,0.6);margin:12px auto;padding-top:7px;">
+					<br>
+					<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >Property Manager ID : ${res.data().id}</p>
+					<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >Property Manager Name : ${res.data().name}</p>
+					<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >Property Manager Password : ${res.data().password} </p>
+					<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >Property Manager Phone : ${res.data().phone} </p>
+					<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700;" >Property Manager Address : ${res.data().address} </p>
+					<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700;" >Property Allotted : ${res.data().prop} </p>
+					<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700;margin-bottom:0;float:right;margin-right:30px;"><i class="fa fa-trash" id="${pmIds[i]}" aria-hidden="true"></i></p>
+					<br>
+
+					</div>
+
+					`
+
+					document.getElementById('pmDiv').innerHTML += newEle; 
+				})
+
+			}
+		}
+
+		window.onclick = async function(e){
+
+			if(e.target.classList[1]==="fa-trash"){
+				await firebase.firestore().collection('pmID').doc(e.target.id).delete().then(()=>{
+					alert("Removed")
+				})
+			}
+		}
+
+
+
+		async function submitData(){
+
+			let name = document.getElementById('name').value;
+			let id = document.getElementById('uid').value;
+			let pass = document.getElementById('pass').value;
+			let phone = document.getElementById('phone').value;
+			let address = document.getElementById('address').value;
+			let propID = document.getElementById('propID').value;
+
+
+			if(name===""||id===""||pass===""||phone===""||address===""||propID===""){
+				alert("Complete All Fields");
+				return;
+			}
+
+			var ref = await firebase.firestore().collection('pmID').doc();
+
+			await firebase.firestore().collection('pmID').doc(ref.id).set({
+
+				id:id,
+				name:name,
+				address: address,
+				password: pass,
+				phone: phone,
+				prop:propID
+
+			})
+
+			
+
+
+		}
+	</script>
+
+</body>
+</html>

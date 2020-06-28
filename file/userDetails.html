@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>User Details</title>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.6/css/all.css">
+
+	<!-- firebase -->
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-storage.js"></script>
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyBv8smcSq6KUFImtYKIAWWZ0PgE3FDqS3s",
+			authDomain: "dev-roomlelo.firebaseapp.com",
+			databaseURL: "https://dev-roomlelo.firebaseio.com",
+			projectId: "dev-roomlelo",
+			storageBucket: "dev-roomlelo.appspot.com",
+			messagingSenderId: "450187201766",
+			appId: "1:450187201766:web:9a14dcd60b4b5101e93f27"
+		};
+		firebase.initializeApp(firebaseConfig);
+	</script>
+	<script>
+		var userID = localStorage.getItem("userQueryID")
+	</script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-dark bg-primary text-center" style="margin-bottom: 20px;">
+		<p class="navbar-brand " style="font-size: 2.0rem; margin:0 auto;"><i class="fa fa-cog" aria-hidden="true"></i> Roomlelo Admin site</p>
+	</nav>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-2">
+				<ul class="list-group" style="font-size: 15px;">
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active " onclick="showPersonal()">Personal</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showProfessional()" >Professional</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showBank()">Bank</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showContact()">Contact</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRequests()" >Requests</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentPaid()">Rent Paid</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentDue()">Rent Due</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showStaying()">Staying</a>
+				</ul>
+			</div>
+
+			<div class="col-9" style="font-size: 15px;margin:0 auto;">
+
+				<!-- Button trigger modal -->
+				<button type="button" style="display: none;" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+					Launch modal
+				</button>
+
+				<!-- Modal -->
+				<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLongTitle">Payment Details</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<form accept-charset="utf-8" onsubmit="return false">
+								<div class="modal-body">
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Date</span>
+										</div>
+										<input type="date"  class="form-control" id="datePaid" required style="height:34px;font-size: 12px;">
+									</div>
+									<br>
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Amount ₹:</span>
+										</div>
+										<input type="number"  class="form-control" id="amountPaid" required style="height:34px;font-size: 12px;">
+									</div>
+									<br>
+									<select id="paymedium" class="form-control">
+										<option value="" disabled selected>Mode of transaction</option>
+										<option value="cash">Cash</option>
+										<option value="online">Online</option>
+									</select>	
+
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									<button type="submit" onclick="payRent()" class="btn btn-danger">Submit</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<!-- Button trigger modal -->
+				<button type="button" style="display: none;" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter00">
+					Launch modal
+				</button>
+
+				<!-- Modal -->
+				<div class="modal fade" id="exampleModalCenter00" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLongTitle">Set Due</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<form accept-charset="utf-8" onsubmit="return false">
+								<div class="modal-body">
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Last Date</span>
+										</div>
+										<input type="date" id="lastDueDate"  class="form-control" required style="height:34px;font-size: 12px;">
+									</div>
+									<br>
+									<div class="input-group">
+										<div class="input-group-prepend" >
+											<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Amount ₹:</span>
+										</div>
+										<input type="number" id="amtDue"  class="form-control" required style="height:34px;font-size: 12px;">
+									</div>
+									<br>	
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									<button type="submit" onclick="submitDue()" class="btn btn-danger">Submit</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<form accept-charset="utf-8" style="margin-bottom:0px;" id="form-personal" onsubmit="return false">
+					<p style="margin-top:20px;color:grey;font-family:Montserrat">Profile Photo<sup style="color:red;">*</sup></p>
+					<div id="u_image_div" style="display:block;text-align: center; margin:20px auto; ">
+						<img id="profilePic" style="height:170px;width:170px;box-shadow: 3px 4px 0px rgba(0,0,0,0.2);margin:0 auto;display:block;"><br>
+						<button type="button" class="addUserImage" title="Upload Image">
+							<input  type="file" id="userImage"  value="upload" style=" height: 30px; width:100%; border:0 !important;outline:0px; background:none; text-align:center; margin-top: 14px;padding-left: 5px;"/></button>
+						</div>
+
+						<ul style="margin:0;padding:0;">
+							<li style="list-style:none; margin-bottom:30px;" title="Name">
+								<div class="input-group">
+									<div class="input-group-prepend" >
+										<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;" >Name<sup style="color:red;">*</sup></span>
+									</div>
+									<input type="text" id="user-name"  class="form-control" required style="height:34px;font-size: 12px;">
+								</div>
+							</li>
+							<li style="list-style:none; margin-bottom:30px;" title="Email">
+								<div class="input-group">
+									<div class="input-group-prepend" >
+										<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;" >Email ID<sup style="color:red;">*</sup></span>
+									</div>
+									<input type="text" id="user-email" class="form-control" required style="height:34px;font-size: 12px;">
+								</div>
+							</li>
+							<li style="list-style:none;margin-bottom:30px;" title="Mobile Number">
+								<div class="input-group">
+									<div class="input-group-prepend" >
+										<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;" >Mobile no.<sup style="color:red;">*</sup></span>
+									</div>
+									<input type="number" id="user-mobile" class="form-control" required style="height:34px;font-size: 12px;">
+								</div>
+							</li>
+						</ul>
+						<h6 title="Gender" style="color:grey;font-family:Montserrat;font-weight:700;">Gender<sup style="color:red;">*</sup></h6>
+						<ul style="padding:0;margin:0 0; width:80%; display: flex; justify-content: space-between; font-weight:600;color:black;">
+
+							<li style="list-style:none;margin-bottom:30px;">
+								<div class="custom-control custom-radio" title="Male">
+									<input type="radio" required value="Male"  class="custom-control-input" id="defaultGroupExample1" name="gender" checked>
+									<label class="custom-control-label" for="defaultGroupExample1">Male</label>
+								</div>
+							</li>
+							<li style="list-style:none;margin-bottom:30px;">
+								<div class="custom-control custom-radio" title="Female">
+									<input type="radio" value="Female" required class="custom-control-input" id="defaultGroupExample2" name="gender">
+									<label class="custom-control-label" for="defaultGroupExample2">Female</label>
+								</div>
+							</li>
+							<li style="list-style:none;margin-bottom:30px;">
+								<div class="custom-control custom-radio" title="Other">
+									<input type="radio" value="Other"  required class="custom-control-input" id="defaultGroupExample3" name="gender">
+									<label class="custom-control-label" for="defaultGroupExample3">Other</label>
+								</div>
+							</li>
+						</ul>
+
+						<h6 title="Marital status" style="color:grey;font-family:Montserrat;font-weight:700;">Marital status<sup style="color:red;">*</sup></h6>
+						<ul style="padding:0;margin:0 0; width:70%; display: flex; justify-content: space-between; font-weight:600;color:black;">
+							<li style="list-style:none;margin-bottom:30px;">
+								<div class="custom-control custom-radio" title="Unmarried">
+									<input type="radio" value="Unmarried"  required class="custom-control-input" id="defaultGroupExample4" name="status" checked>
+									<label class="custom-control-label" for="defaultGroupExample4">Unmarried</label>
+								</div>
+							</li>
+							<li style="list-style:none;margin-bottom:30px;">
+								<div class="custom-control custom-radio" title="Married">
+									<input type="radio" required value="Married" class="custom-control-input" id="defaultGroupExample5" name="status">
+									<label class="custom-control-label" for="defaultGroupExample5">Married</label>
+								</div>
+							</li>
+						</ul>
+						<h6 for="birthday" style="color:grey;font-family:Montserrat;font-weight:700;">DOB<sup style="color:red;">*</sup></h6>
+						<div id="birthdate">
+							<input id="birth-date"  type="date" required="required" title="DOB">
+						</div>
+						<br>
+						<button type="submit" id="submit-personal-forms"  style="width:100%;background-color:black; border:0;outline:0;color:white;height:40px;margin-bottom:30px;margin-top:40px;transition:all ease 0.1s;font-family:Montserrat;"  onclick="submitPersonal()">Submit</button>
+					</form>
+
+
+					<!-- form for professional details  -->
+					<form id="form-professional" accept-charset="utf-8" style="margin-top:40px;margin-bottom:0px;" onsubmit="return false">
+						<h6 style="color:grey;font-family:Montserrat;font-weight:700;">Employment Status<sup style="color:red;">*</sup></h6>
+						<ul style="padding:0;margin:0 0; width:100%; display: flex; justify-content: space-between; font-weight:400;color:black;">
+
+							<li style="list-style:none;">
+								<div class="custom-control custom-radio">
+									<input type="radio" required value="Student" class="custom-control-input" id="Example1" name="employee" checked>
+									<label class="custom-control-label" for="Example1">Student</label>
+								</div>
+							</li>
+							<li style="list-style:none;">
+								<div class="custom-control custom-radio">
+									<input type="radio" required value="Employed" class="custom-control-input" id="Example2" name="employee">
+									<label class="custom-control-label" for="Example2">Employed</label>
+								</div>
+							</li>
+							<li style="list-style:none;">
+								<div class="custom-control custom-radio">
+									<input type="radio" required value="Self Employed" class="custom-control-input" id="Example3" name="employee">
+									<label class="custom-control-label" for="Example3">Self Employed</label>
+								</div>
+							</li>
+						</ul>
+						<br>
+
+						<div class="input-group">
+							<div class="input-group-prepend" >
+								<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;" >Employer/Student name<sup style="color:red;">*</sup></span>
+							</div>
+							<input id="employer-name" type="text" id="user-mobile" class="form-control" required style="height:34px;font-size: 12px;">
+						</div>
+						<br>
+
+						<h6 style="color:grey;font-family:Montserrat;font-weight:700;">Highest education qualification<sup style="color:red;">*</sup></h6>
+						<ul style="padding:0;margin:0 0; width:100%; display: flex; justify-content: space-between; font-weight:400;color:black;">
+
+							<li style="list-style:none;">
+								<div class="custom-control custom-radio">
+									<input type="radio" required value="10" class="custom-control-input" id="quali1" name="education" checked>
+									<label class="custom-control-label" for="quali1">10 <sup>th</sup></label>
+								</div>
+							</li>
+							<li style="list-style:none;">
+								<div class="custom-control custom-radio">
+									<input type="radio" required value="12" class="custom-control-input" id="quali2" name="education">
+									<label class="custom-control-label" for="quali2">12 <sup>th</sup></label>
+								</div>
+							</li>
+							<li style="list-style:none;">
+								<div class="custom-control custom-radio">
+									<input type="radio" required value="UG" class="custom-control-input" id="quali3" name="education">
+									<label class="custom-control-label" for="quali3">UG</label>
+								</div>
+							</li>
+							<li style="list-style:none;">
+								<div class="custom-control custom-radio">
+									<input type="radio" required value="PG" class="custom-control-input" id="quali4" name="education">
+									<label class="custom-control-label" for="quali4">PG</label>
+								</div>
+							</li>
+							<li style="list-style:none;">
+								<div class="custom-control custom-radio">
+									<input type="radio" required value="Phd" class="custom-control-input" id="quali5" name="education">
+									<label class="custom-control-label" for="quali5">Phd</label>
+								</div>
+							</li>
+						</ul>
+						<br>
+
+						<div class="input-group">
+							<div class="input-group-prepend" >
+								<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;" >Mobile no.<sup style="color:red;">*</sup></span>
+							</div>
+							<input type="number" id="employer-mobile" class="form-control" required style="height:34px;font-size: 12px;">
+						</div>
+						<br>
+
+						<div class="input-group">
+							<div class="input-group-prepend" >
+								<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;" >Office Email ID<sup style="color:red;">*</sup></span>
+							</div>
+							<input type="email" id="employer-email" class="form-control" required style="height:34px;font-size: 12px;">
+						</div>
+						<br>
+
+						<h6 style="margin-top:30px;color:grey;font-family:Montserrat;font-weight:700;">Professional proof (Employment/Student ID)</h6>
+						<button type="button" onclick="seeIDProof()" class="btn btn-dark">See ID Proof</button>
+						<br>
+
+						<h6 style="margin-top:30px;color:grey;font-family:Montserrat;font-weight:700;">Attach ID proof</h6>
+						<button type="submit" id="attach-proof" style="width:100%;background-color:black; border:0;outline:0;color:white;height:40px;margin-bottom:20px;transition:all ease 0.1s;"><input  type="file" id="fileName"  value="upload" style=" height: 30px; width:100%; border:0 !important;outline:0px; background:none; padding-top: 0px;padding-left: 5px;"/></button>
+
+						<button type="submit" id="submit-professional-forms" onclick=" submitProfessional()"  style="width:100%;background-color:black; border:0;outline:0;color:white;height:40px;margin-bottom:30px;margin-top:40px;transition:all ease 0.1s;font-family:Montserrat;">Submit</button>
+
+					</form>
+
+					<form id="form-contact" accept-charset="utf-8" style="margin-top:40px;margin-bottom:0px;" onsubmit="return false">
+
+						<label style="color:grey;font-family:Montserrat;font-weight:700;">Please provide us the details of your emergency contact</label><br>
+						<h6 style="color:grey;font-family:Montserrat;font-weight:700;">Address<sup style="color:red;">*</sup></h6>
+						<textarea id="emer-address" style="width:100%;height:100px;border:1px solid black;padding-left:5px;" placeholder="Lane R4 Jagmohan Nagar Vanarshi"></textarea>
+						<br>
+						<br>
+						<div class="input-group">
+							<div class="input-group-prepend" >
+								<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;" >Mobile no.<sup style="color:red;">*</sup></span>
+							</div>
+							<input type="number"  id="emer-phone" class="form-control" required style="height:34px;font-size: 12px;">
+						</div>
+
+						<br>
+						<div class="input-group">
+							<div class="input-group-prepend" >
+								<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;" >Guardian's name<sup style="color:red;">*</sup></span>
+							</div>
+							<input type="text"  id="emer-g-name" class="form-control" required style="height:34px;font-size: 12px;">
+						</div>
+						<button type="submit" onclick="submitContact()" id="submit-contact-forms"  style="width:100%;background-color:black; border:0;outline:0;color:white;height:40px;margin-bottom:30px;margin-top:40px;transition:all ease 0.1s;font-family:Montserrat;">Submit</button>
+					</form>
+
+					<form  id="form-bank" accept-charset="utf-8" style="margin-top:40px;margin-bottom:0px;" onsubmit="return false">
+						<div class="input-group">
+							<div class="input-group-prepend" >
+								<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Account holder's name<sup style="color:red;">*</sup></span>
+							</div>
+							<input type="text"  id="ac-name" class="form-control" required style="height:34px;font-size: 12px;">
+						</div>
+						<br>
+
+						<div class="input-group">
+							<div class="input-group-prepend" >
+								<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Account no.<sup style="color:red;">*</sup></span>
+							</div>
+							<input type="number" id="ac-num" class="form-control" required style="height:34px;font-size: 12px;">
+						</div>
+						<br>
+
+						<div class="input-group">
+							<div class="input-group-prepend" >
+								<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">IFSC code<sup style="color:red;">*</sup></span>
+							</div>
+							<input type="text" id="ifsc" class="form-control" required style="height:34px;font-size: 12px;">
+						</div>
+						<br>
+
+						<div class="input-group">
+							<div class="input-group-prepend" >
+								<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Branch name<sup style="color:red;">*</sup></span>
+							</div>
+							<input type="text" id="branch-name" class="form-control" required style="height:34px;font-size: 12px;">
+						</div>
+
+
+						<button type="submit" id="submit-bank-forms" onclick="submitBank()"  style="width:100%;background-color:black; border:0;outline:0;color:white;height:40px;margin-bottom:30px;margin-top:40px;transition:all ease 0.1s;font-family:Montserrat;">Submit</button>
+					</form>
+
+
+
+					<div id="requests">
+						<div id="status_div">
+							
+						</div>
+					</div>
+					<div id="rentPaid">
+						<div id="paidData">
+							
+						</div>
+					</div>
+
+					<div id="rentDue">
+						<button class="btn btn-danger" style="display: block;margin:0 auto;" data-toggle="modal" data-target="#exampleModalCenter00" >Set Due Amount</button>
+					</div>
+
+					<div id="staying" class="container-fluid">
+						<div class="row">
+							<div class="col-5">
+								<img id="propimg" src="" style="width:240px;"  alt="">
+							</div>
+							<div class="col-7" id="stay-data">
+								
+							</div>
+							<br>
+							<br>
+							<div id="rent-val" style="width: 100%">
+								
+							</div>
+							<br>
+							<br>
+							<br>
+							<br>
+						</div>
+					</div>
+
+
+
+
+				</div>
+
+
+
+				<script>
+					if((/@/).test(userID)){
+
+						document.getElementById('userImage').style.display = 'block';
+
+					}else{
+
+						document.getElementById('userImage').style.display = 'none';
+						
+					}
+
+					var user_new_img = 'randomString';
+					document.getElementById('userImage').addEventListener('change', function(e){
+ 						user_new_img = e.target.files[0]; // to user photo
+ 					});
+
+					var proofDoc = "randomProofDoc";
+					document.getElementById('fileName').addEventListener('change', function(e){
+ 						proofDoc = e.target.files[0]; // to attach proof file
+ 					});
+
+
+
+					async function submitContact(){
+
+						var contact = {
+							emergencyAddress:$("#emer-address").val(),
+							emergencyMobile:$("#emer-phone").val(),
+							emergencyGardian:$("#emer-g-name").val()
+						}
+
+						await firebase.firestore().collection('userProfile').doc(userID).update({
+							contact: contact
+						})
+
+						setTimeout(function(){
+							alert('Updated');
+						},1200)
+
+
+					}
+
+
+
+
+
+					async function submitBank(){
+
+						var bank = {
+							accHolderName:$("#ac-name").val(),
+							accNumber:$("#ac-num").val(),
+							ifsc:$("#ifsc").val(),
+							branchName:$("#branch-name").val()
+						}
+
+						await firebase.firestore().collection('userProfile').doc(userID).update({
+							bank: bank
+						})
+
+						setTimeout(function(){
+							alert('Updated');
+						},1200)
+
+
+					}
+
+
+					async function submitProfessional(){
+
+						var employment;
+						var qualification;
+
+						if($("#Example1").is(':checked'))
+							employment="Student"
+						if($("#Example2").is(':checked'))
+							employment="Employed"
+						if($("#Example3").is(':checked'))
+							employment="Self Employed"
+
+						if($("#quali1").is(':checked'))
+							qualification="10th"
+						if($("#quali2").is(':checked'))
+							qualification="12th"
+						if($("#quali3").is(':checked'))
+							qualification="UG"
+						if($("#quali4").is(':checked'))
+							qualification="PG"
+						if($("#quali5").is(':checked'))
+							qualification="Phd"
+
+						var professional = {
+							employment:employment,
+							employerName:$("#employer-name").val(),
+							officeMobile:$("#employer-mobile").val(),
+							officeEmail:$("#employer-email").val(),
+							qualification:qualification,
+							proofID:userID
+						}
+
+						await firebase.firestore().collection('userProfile').doc(userID).update({
+							professional: professional
+						})
+
+
+						if(proofDoc!=='randomProofDoc'){
+
+							var task = firebase.storage().ref("userProof/"+userID).put(proofDoc);
+							task.on('state_changed', function complete(){
+								alert('Updated');
+							})
+
+						}else{
+							alert('Updated');
+						}
+
+
+
+					}
+
+					async function seeIDProof(){
+						await firebase.storage().ref("userProof/"+userID).getDownloadURL().then(url =>{
+							
+							window.open(url,"_blank")
+						});
+					}
+
+
+					async function submitPersonal(){
+						var gender;
+						var status;
+
+						if($("#defaultGroupExample1").is(':checked'))
+							gender="Male"
+						if($("#defaultGroupExample2").is(':checked'))
+							gender="Female"
+						if($("#defaultGroupExample3").is(':checked'))
+							gender="Other"
+
+						if($("#defaultGroupExample4").is(':checked'))
+							status="Unmarried";
+						if($("#defaultGroupExample5").is(':checked'))
+							status="Married";
+
+						var user_photo;
+
+						if((/@/).test(userID)){
+							user_photo = userID;
+						}else{
+							
+							user_photo = "gmail profile image"
+						}
+
+						var personal = {
+							name: $("#user-name").val(),
+							mobile: $("#user-mobile").val(),
+							email: $("#user-email").val(),
+							DOB: $("#birth-date").val(),
+							gender: gender,
+							maritalStatus: status,
+							photo:user_photo
+						}
+
+						await firebase.firestore().collection('userProfile').doc(userID).update({
+							personal: personal  
+						})
+
+						if(user_new_img!=='randomString'){
+
+							var task = firebase.storage().ref("userImage/"+userID).put(user_new_img);
+							task.on('state_changed', function complete(){
+								alert('Updated');
+							})
+
+						}else{
+							alert('Updated');
+						}
+
+
+
+
+					}
+				</script>
+
+
+
+
+
+
+				<script>
+					function showPersonal(){
+						document.getElementsByClassName('col-2')[0].innerHTML =`
+
+						<ul class="list-group" style="font-size: 15px;">
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active " onclick="showPersonal()">Personal</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showProfessional()" >Professional</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showBank()">Bank</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showContact()">Contact</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRequests()" >Requests</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentPaid()">Rent Paid</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentDue()">Rent Due</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showStaying()">Staying</a>
+						</ul>
+						`
+						document.getElementById('form-personal').style.display = 'block'
+						document.getElementById('form-professional').style.display = 'none'
+						document.getElementById('form-contact').style.display = 'none'
+						document.getElementById('form-bank').style.display = 'none'
+						document.getElementById('requests').style.display = 'none'
+						document.getElementById('rentPaid').style.display = 'none'
+						document.getElementById('rentDue').style.display = 'none'
+						document.getElementById('staying').style.display = 'none'
+					}
+
+					function showProfessional(){
+						document.getElementsByClassName('col-2')[0].innerHTML =`
+
+						<ul class="list-group" style="font-size: 15px;">
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showPersonal()">Personal</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active" onclick="showProfessional()" >Professional</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showBank()">Bank</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showContact()">Contact</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRequests()" >Requests</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentPaid()">Rent Paid</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentDue()">Rent Due</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showStaying()">Staying</a>
+						</ul>
+						`
+						document.getElementById('form-professional').style.display = 'block'
+						document.getElementById('form-personal').style.display = 'none'
+						document.getElementById('form-contact').style.display = 'none'
+						document.getElementById('form-bank').style.display = 'none'
+						document.getElementById('requests').style.display = 'none'
+						document.getElementById('rentPaid').style.display = 'none'
+						document.getElementById('rentDue').style.display = 'none'
+						document.getElementById('staying').style.display = 'none'
+					}
+					function showBank(){
+						document.getElementsByClassName('col-2')[0].innerHTML =`
+						<ul class="list-group" style="font-size: 15px;">
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showPersonal()">Personal</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showProfessional()" >Professional</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active" onclick="showBank()">Bank</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showContact()">Contact</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRequests()" >Requests</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentPaid()">Rent Paid</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentDue()">Rent Due</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showStaying()">Staying</a>
+						</ul>
+						`
+						document.getElementById('form-bank').style.display = 'block'
+						document.getElementById('form-personal').style.display = 'none'
+						document.getElementById('form-contact').style.display = 'none'
+						document.getElementById('form-professional').style.display = 'none'
+						document.getElementById('requests').style.display = 'none'
+						document.getElementById('rentPaid').style.display = 'none'
+						document.getElementById('rentDue').style.display = 'none'
+						document.getElementById('staying').style.display = 'none'
+					}
+					function showContact(){
+						document.getElementsByClassName('col-2')[0].innerHTML =`
+
+						<ul class="list-group" style="font-size: 15px;">
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showPersonal()">Personal</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showProfessional()" >Professional</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showBank()">Bank</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active" onclick="showContact()">Contact</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRequests()" >Requests</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentPaid()">Rent Paid</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentDue()">Rent Due</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showStaying()">Staying</a>
+						</ul>
+						`
+						document.getElementById('form-contact').style.display = 'block'
+						document.getElementById('form-personal').style.display = 'none'
+						document.getElementById('form-bank').style.display = 'none'
+						document.getElementById('form-professional').style.display = 'none'
+						document.getElementById('requests').style.display = 'none'
+						document.getElementById('rentPaid').style.display = 'none'
+						document.getElementById('rentDue').style.display = 'none'
+						document.getElementById('staying').style.display = 'none'
+					}
+
+					async function showRequests(){
+						document.getElementsByClassName('col-2')[0].innerHTML =`
+
+						<ul class="list-group" style="font-size: 15px;">
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showPersonal()">Personal</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showProfessional()" >Professional</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showBank()">Bank</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showContact()">Contact</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active " onclick="showRequests()" >Requests</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentPaid()">Rent Paid</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentDue()">Rent Due</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showStaying()">Staying</a>
+						</ul>
+						`
+						document.getElementById('requests').style.display = 'block'
+						document.getElementById('form-personal').style.display = 'none'
+						document.getElementById('form-bank').style.display = 'none'
+						document.getElementById('form-professional').style.display = 'none'
+						document.getElementById('form-contact').style.display = 'none'
+						document.getElementById('rentPaid').style.display = 'none'
+						document.getElementById('rentDue').style.display = 'none'
+						document.getElementById('staying').style.display = 'none'
+
+
+
+
+						var arrSolved = [];
+						var arrUnsolved = [];
+						slNumber = [];
+						var arrIds = []; // id of all maintan requests
+
+						document.getElementById('status_div').innerHTML = ``
+
+						
+						await firebase.firestore().collection('userRequests').doc(userID).get().then(res =>{
+							if(res.exists){
+								res.data().id.forEach( function(element) {
+									arrIds.push(element);
+								});
+							}
+
+						}).catch(err =>{
+							console.log(err)
+						})
+						
+
+						for(let i =0;i<arrIds.length ;i++){  // get all data of Maintenance
+							await firebase.firestore().collection('userMaintenance').doc(arrIds[i]).get().then(res =>{
+								var x = {
+									sec:res.data().date.seconds,
+									service:res.data().service,
+									sl:res.data().sl,
+									date:res.data().date.toDate().toString().substring(0,10),
+									solved : res.data().solved,
+									issue: res.data().issue,
+									visitDate :res.data().visitDate,
+									visitTime : res.data().visitTime,
+									des :res.data().description,
+									photo: res.data().photo
+								}
+
+								if(res.data().solved){
+									arrSolved.push(x)
+
+								}else{
+
+									arrUnsolved.push(x)	
+								}
+
+							})
+						}
+
+
+						arrUnsolved.sort(function(a,b){ return Number(b.sec) - Number(a.sec)});
+
+						Array.from(arrUnsolved).forEach(function(element, index) {
+							if(element.date.charAt(9)=='1')
+								element.date += "st";
+							else if(element.date.charAt(9)=='2')
+								element.date += "nd";
+							else if(element.date.charAt(9)=='3')
+								element.date += "rd";
+							else
+								element.date += "th";
+
+							var checked ="";
+							var color ='color:black'
+
+							if(element.solved){
+								checked = "checked";
+								color = 'color:green';
+							}
+							else{
+								checked = " ";
+								color = 'color:red';
+
+							}
+
+
+							var newEle =`
+							<div data-aos="fade-up"  data-aos-offset="120"style="width:95%;height:100%;background-color:white;border-radius:3px;border:1px solid #ddd;box-shadow:0px 2px 5px rgba(0,0,0,0.6);margin:12px auto;padding-top:7px;">
+							<span style="color:grey;font-size:13px;margin-left:20px;margin-top:10px;">${element.sl}</span> <span style="float:right;margin-right:20px;color:grey;font-size:13px;margin-top:0px;">${element.date}</span>
+							<h6 style="margin-left:20px;margin-top:7px;font-family:Montserrat;font-weight:700">${element.service}</h6>
+							<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:400">${element.issue}</p>
+							<p style="margin-top:-5px;margin-left:20px;font-size:12px;font-weight:400">${element.des}</p>
+							<span style="margin-top:-5px;margin-right:20px;font-size:12px;font-weight:400;float:right;">Visit Date: ${element.visitDate}</span><span style="margin-top:-5px;margin-left:20px;font-size:12px;font-weight:400;float:right;padding-right:15px;">Visit Time: ${element.visitTime}</span>
+							<p style="margin-top:-5px;padding-left:20px;font-size:13px;font-weight:700"><span style=${color} > Service on progress</span></p>
+							<i id="${element.sl}Photo" style="margin-right:20px;font-size:20px;float:right;" class="fa fa-eye" aria-hidden="true"></i>
+							<label style="margin-top:5px;margin-left:20px;" class="switch">
+							<input type="checkbox" id="${element.sl}" ${checked} >
+							<span class="slider"></span>
+							</label>
+							</div>
+
+
+							`
+							document.getElementById('status_div').innerHTML += newEle
+								slNumber.push(element.sl)  // all serial number array 				
+							});
+
+
+
+						arrSolved.sort(function(a,b){ return Number(b.sec) - Number(a.sec)});
+						Array.from(arrSolved).forEach(function(element, index) {
+
+							if(element.date.charAt(9)=='1')
+								element.date += "st";
+							else if(element.date.charAt(9)=='2')
+								element.date += "nd";
+							else if(element.date.charAt(9)=='3')
+								element.date += "rd";
+							else(element.date.charAt(9)=='0')
+								element.date += "th";
+
+							var checked ="";
+							var color ='color:black'
+
+							if(element.solved){
+								checked = "checked";
+								color = 'color:green';
+							}
+							else{
+								checked = " ";
+								color = 'color:red';
+
+							}
+
+
+							var newEle =`
+							<div data-aos="fade-up"  data-aos-offset="120"style="width:95%;height:100%;background-color:white;border-radius:3px;border:1px solid #ddd;box-shadow:0px 2px 5px rgba(0,0,0,0.6);margin:12px auto;padding-top:7px;">
+							<span style="color:grey;font-size:13px;margin-left:20px;margin-top:10px;">${element.sl}</span> <span style="float:right;margin-right:20px;color:grey;font-size:13px;margin-top:0px;">${element.date}</span>
+							<h6 style="margin-left:20px;margin-top:7px;font-family:Montserrat;font-weight:700">${element.service}</h6>
+							<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:400">${element.issue}</p>
+							<p style="margin-top:-5px;margin-left:20px;font-size:12px;font-weight:400">${element.des}</p>
+							<span style="margin-top:-5px;margin-right:20px;font-size:12px;font-weight:400;float:right;">Visit Date: ${element.visitDate}</span><span style="margin-top:-5px;margin-left:20px;font-size:12px;font-weight:400;float:right;padding-right:15px;">Visit Time: ${element.visitTime}</span>
+							<p style="margin-top:-5px;padding-left:20px;font-size:13px;font-weight:700"><span style=${color} > Done!</span></p>
+							<i id="${element.sl}Photo" style="margin-right:20px;font-size:20px;float:right;" class="fa fa-eye" aria-hidden="true"></i>
+							<label style="margin-top:5px;margin-left:20px;" class="switch">
+							<input type="checkbox" id="${element.sl}" ${checked} >
+							<span class="slider"></span>
+							</label>
+							</div>
+
+
+							`
+							document.getElementById('status_div').innerHTML += newEle
+
+							slNumber.push(element.sl)
+						});
+
+					}
+
+					function showRentPaid(){
+
+						document.getElementsByClassName('col-2')[0].innerHTML =`
+
+						<ul class="list-group" style="font-size: 15px;">
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showPersonal()">Personal</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showProfessional()" >Professional</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showBank()">Bank</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showContact()">Contact</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRequests()" >Requests</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active" onclick="showRentPaid()">Rent Paid</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRentDue()">Rent Due</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showStaying()">Staying</a>
+						</ul>
+						`
+						document.getElementById('rentPaid').style.display = 'block'
+						document.getElementById('form-personal').style.display = 'none'
+						document.getElementById('form-bank').style.display = 'none'
+						document.getElementById('form-professional').style.display = 'none'
+						document.getElementById('form-contact').style.display = 'none'
+						document.getElementById('requests').style.display = 'none'
+						document.getElementById('rentDue').style.display = 'none'
+						document.getElementById('staying').style.display = 'none'
+
+
+						invoiceNum = [];
+						var rentArr = [];
+						document.getElementById('paidData').innerHTML = ``
+						var arrMonth = ['JAN','FEB' ,'MAR' ,'APR' , 'MAY' , 'JUN' , 'JUL' , 'AUG', 'SEP' , 'OCT' , 'NOV' , 'DEC'];
+
+						firebase.firestore().collection('rentPaid').doc(userID).get().then(res =>{
+							(res.data().paid).forEach( (ele) => {
+
+								var x = {
+								sec: ele.date.seconds, //second of timestamp
+								amount: ele.amount,
+								total: ele.total,
+								vn: ele.vn,
+								date: ele.date.toDate().toString().substring(0,10),
+								month:  ele.month
+							}
+							rentArr.push(x);
+							invoiceNum.push(x.vn);
+						});
+
+							rentArr.sort(function(a,b){ return Number(b.sec) - Number(a.sec)});
+							rentArr.forEach((element, index) => {
+								if(element.date.charAt(9)=='1')
+									element.date += "st";
+								else if(element.date.charAt(9)=='2')
+									element.date += "nd";
+								else if(element.date.charAt(9)=='3')
+									element.date += "rd";
+								else
+									element.date += "th";
+
+								var newEle =`
+								<div style="width:95%;height:105px;background-color:white;border-radius:0px;border:1px solid #ddd;box-shadow:0px 2px 5px rgba(0,0,0,0.6);margin:12px auto;position:relative;">
+								<div style="border-left: 2px solid rgb(219, 219, 219);height:53px;position:absolute;top:50%;margin-left:30px;transform:translate(0%,-50%)"></div>
+
+								<span style="color:black; font-size:13px; width:100%; height:24px; background:rgb(211, 211, 211); display:block;box-shadow:0px 2px 2px rgba(0,0,0,0.7);"><span style="margin-left:12px;font-family:Montserrat;font-weight:600;font-size:15px;">Invoice No.: </span><span style="color:#3fb6c6;font-family:Montserrat;font-weight:600;font-size:15px;">${element.vn}</span></span> 
+								<h6 style="margin-left:40px;margin-top:14px;font-family:Montserrat;font-weight:700"><i class="fa fa-circle-o" aria-hidden="true" style="position:absolute;margin-left:-16px;color:#3fb6c6;background-color:white;"></i>Rent ${element.month} <span style="float:right;margin-right:10px;"> ₹ ${element.amount}</span></h6>
+								<p style="margin-top:-7px;margin-left:40px;font-size:13px;position:relative;"><span style="font-family:Montserrat;"> Paid on ${element.date}</span></p>
+								<hr style="margin-top:-13px;margin-bottom:0;">
+								<p style="margin-left:15px; font-family:Montserrat;font-weight:600; font-size:15px;">Total: ₹ ${element.total}<span style="float:right;margin-right:10px;" id="${element.vn}view">VIEW INVOICE</span></p>
+								</div>
+								`
+								document.getElementById('paidData').innerHTML += newEle;
+							});
+
+						});
+					}
+
+					var arrDueCheckbox = [];
+					var dueRentArr = [];
+					function showRentDue(){
+						arrDueCheckbox = [];
+
+						document.getElementsByClassName('col-2')[0].innerHTML =`
+
+						<ul class="list-group" style="font-size: 15px;">
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showPersonal()">Personal</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showProfessional()" >Professional</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showBank()">Bank</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showContact()">Contact</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRequests()" >Requests</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showRentPaid()">Rent Paid</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active" onclick="showRentDue()">Rent Due</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showStaying()">Staying</a>
+						</ul>
+						`
+						document.getElementById('rentDue').style.display = 'block'
+						document.getElementById('form-personal').style.display = 'none'
+						document.getElementById('form-bank').style.display = 'none'
+						document.getElementById('form-professional').style.display = 'none'
+						document.getElementById('form-contact').style.display = 'none'
+						document.getElementById('requests').style.display = 'none'
+						document.getElementById('rentPaid').style.display = 'none'
+						document.getElementById('staying').style.display = 'none'
+
+
+						dueRentArr = [];
+						document.getElementById('rentDue').innerHTML = `
+						<button class="btn btn-danger" style="display: block;margin:0 auto;" data-toggle="modal" data-target="#exampleModalCenter00" >Set Due Amount</button>
+						`;
+
+						firebase.firestore().collection('rentDue').doc(userID).get().then(res =>{
+							(res.data().due).forEach( (ele) => {
+
+								var x = {
+								sec: ele.lastDate.seconds, //second of timestamp
+								amount: ele.amount,
+								total: ele.total,
+								date: ele.lastDate.toDate().toString().substring(0,10),
+								month:  ele.month.toUpperCase(),
+								vn: ele.vn,
+								name: ele.name,
+								lastDate: ele.lastDate
+							}
+							dueRentArr.push(x);
+						});
+
+							dueRentArr.sort(function(a,b){ return Number(b.sec) - Number(a.sec)});
+							dueRentArr.forEach((element, index) => {
+								if(element.date.charAt(9)=='1')
+									element.date += "st";
+								else if(element.date.charAt(9)=='2')
+									element.date += "nd";
+								else if(element.date.charAt(9)=='3')
+									element.date += "rd";
+								else
+									element.date += "th";
+
+								var newEle =`
+								<div style="width:95%;height:105px;background-color:white;border-radius:0px;border:1px solid #ddd;box-shadow:0px 2px 5px rgba(0,0,0,0.6);margin:12px auto;position:relative;">
+								<div style="border-left: 2px solid rgb(219, 219, 219);height:53px;position:absolute;top:50%;margin-left:30px;transform:translate(0%,-50%)"></div>
+
+								<span id="${element.vn}" style="color:black; font-size:13px; width:100%; height:23px; background:white; display:block;box-shadow:0px 2px 2px rgba(0,0,0,0.7);"><span style="margin-left:12px;font-family:Montserrat;font-weight:600;font-size:15px;color:red">Due ${element.vn}
+								</span>
+								<button data-toggle="modal" data-target="#exampleModalCenter"  class="btn btn-danger" style="padding:0;height:23px;margin-right:15px;padding-left:5px;padding-right:5px; float:right;" id="${element.sec}">Paid!</button>
+								</span>
+
+
+
+								<h6 style="margin-left:40px;margin-top:14px;font-family:Montserrat;font-weight:700"><i class="fa fa-circle-o" aria-hidden="true" style="position:absolute;margin-left:-16px;color:#3fb6c6;background-color:white;"></i>Rent ${element.month} <span style="float:right;margin-right:10px;"> ₹ ${element.amount}</span></h6>
+								<p style="margin-top:-7px;margin-left:40px;font-size:13px;position:relative;"><span style="font-family:Montserrat;"> Last date ${element.date}</span></p>
+								<hr style="margin-top:-13px;margin-bottom:0;">
+								<p style="margin-left:15px; font-family:Montserrat;font-weight:600; font-size:15px;">Total: ₹ ${element.total}<span style="float:right;margin-right:10px;"></span></p>
+								</div>
+								`
+								arrDueCheckbox.push(element.sec)
+								document.getElementById('rentDue').innerHTML += newEle;
+							});
+
+						});
+
+
+
+					}
+
+					async function showStaying(){
+
+						document.getElementsByClassName('col-2')[0].innerHTML =`
+
+						<ul class="list-group" style="font-size: 15px;">
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showPersonal()">Personal</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showProfessional()" >Professional</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showBank()">Bank</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showContact()">Contact</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" onclick="showRequests()" >Requests</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showRentPaid()">Rent Paid</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " onclick="showRentDue()">Rent Due</a>
+						<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active" onclick="showStaying()">Staying</a>
+						</ul>
+						`
+						document.getElementById('staying').style.display = 'block'
+						document.getElementById('form-personal').style.display = 'none'
+						document.getElementById('form-bank').style.display = 'none'
+						document.getElementById('form-professional').style.display = 'none'
+						document.getElementById('form-contact').style.display = 'none'
+						document.getElementById('requests').style.display = 'none'
+						document.getElementById('rentPaid').style.display = 'none'
+						document.getElementById('rentDue').style.display = 'none'
+
+						let propID;
+						let ownerID;
+						let seconds;
+						let ownerName;
+						let ownerPhone;
+						let ownerEmail;
+						let ownerAddress;
+						let photo;
+						let propAddress;
+						let sharing = {};
+						let roomType;
+
+						
+
+						await firebase.firestore().collection('registeredUser').doc(userID).get().then(res =>{
+							propID = res.data().propertyId
+							ownerID = res.data().ownerId
+							seconds = res.data().seconds
+							roomType = res.data().roomType
+
+						})
+
+
+						await firebase.firestore().collection('ownerProfile').doc(ownerID).get().then(res =>{
+							ownerName = res.data().name;
+							ownerPhone = res.data().phone;
+							ownerEmail = res.data().email;
+							ownerAddress = res.data().address;
+						})
+
+						
+						await firebase.firestore().collection('properties').doc(propID).get().then(res =>{
+
+							propAddress = res.data().propertyAddress
+							photo = res.data().photos[0];
+							sharing = res.data().rentDetails;
+						})
+
+
+
+						// console.log(sharing["2 Sharing"])
+						// console.log(sharing["3 Sharing"])
+
+						console.log(sharing[roomType])
+						console.log(roomType);
+						console.log(sharing);
+
+						var rentMoney = sharing[roomType]
+
+						var myFirebaseFirestoreTimestampFromDate = firebase.firestore.Timestamp.fromDate(new Date());
+
+						var dateofMovein = new Date(seconds*1000)
+
+						
+						var days = Math.ceil(Number((myFirebaseFirestoreTimestampFromDate.seconds - seconds)/(60*60*24)));
+
+						document.getElementById('propimg').src=photo
+
+						var newEle = `
+
+
+						<ul style="margin-left:0px;padding-top: 20px;">
+						<li style="list-style: none;"><span style="font-size: 16px;font-family: monospace;font-weight: bold;">Property ID: ${propID}</span></li>
+						<br>
+						<li style="list-style: none;"><span style="font-size: 16px;font-family: monospace;font-weight: bold;">Owner's ID: ${ownerID}</span></li>
+						<br>
+						<li style="list-style: none;"><span style="font-size: 16px;font-family: monospace;font-weight: bold;">Owner's Name: ${ownerName}</span></li>
+						<br>
+						<li style="list-style: none;"><span style="font-size: 16px;font-family: monospace;font-weight: bold;">Owner's Email: ${ownerEmail}</span></li>
+						<br>
+
+						<li style="list-style: none;"><span style="font-size: 16px;font-family: monospace;font-weight: bold;">Owner's Phone: ${ownerPhone}</span></li>
+						<br>
+
+						<li style="list-style: none;"><span style="font-size: 16px;font-family: monospace;font-weight: bold;">Owner's Address: ${ownerAddress}</span></li>
+						<br>
+
+						<li style="list-style: none;"><span style="font-size: 16px;font-family: monospace;font-weight: bold;">Property's Address: ${propAddress}</span></li>
+						<br>
+						<li style="list-style: none;"><p style="font-size: 16px;font-family: monospace;font-weight: bold;">Move in Date: ${dateofMovein} </p></li>
+						<li style="list-style: none;"><p style="font-size: 16px;font-family: monospace;font-weight: bold;">Staying Days: ${days} </p></li>
+
+						</ul>
+
+						`
+
+						document.getElementById('stay-data').innerHTML = newEle;
+
+						// await firebase.firestore().collection('').doc(propID).get().then(res =>{
+
+
+						// })
+
+						var rentPerMonth;
+						var securityMoney;
+
+						if(Number(rentMoney[0])>Number(rentMoney[1])){
+							rentPerMonth = rentMoney[1];
+							securityMoney = rentMoney[0];
+						}else{
+							rentPerMonth = rentMoney[0];
+							securityMoney = rentMoney[1];
+						}
+
+						var newEle = `
+
+						<table class="table table-striped">
+						<thead>
+						<tr>
+						<th scope="col">Room Type</th>
+						<th scope="col">Rent/month</th>
+						<th scope="col">Secutity deposite</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr>
+						<td>${roomType}</td>
+						<td> ₹ ${rentPerMonth }</td>
+						<td> ₹ ${securityMoney}</td>
+						</tr>
+						</tbody>
+						</table>
+
+						`
+
+						document.getElementById('rent-val').innerHTML = newEle;
+
+
+
+
+					}
+				</script>
+
+				<script>
+					var slNumber = []; // to get images from DB. It is in main\request
+					var invoiceNum = []; // put invoice number
+					var vnNumber; // vn main number
+					window.onclick = function(e){
+						if(slNumber.indexOf(e.target.id.substring(0,e.target.id.length-5))!==-1 &&  e.target.type!=="checkbox")
+						{
+							var id = e.target.id.substring(0,e.target.id.length-5);
+							firebase.storage().ref("userMaintenanceImage/"+id).getDownloadURL().then(url =>{
+								window.open(url)
+							}).catch(err=>{
+								console.log(err)
+							})
+						}
+
+						if(invoiceNum.indexOf(e.target.id.substring(0,e.target.id.length-4))!==-1)
+						{
+							localStorage.setItem('invoiceNumber', e.target.id.substring(0,e.target.id.length-4));
+							window.open("invoice.html","_blank")
+						}
+
+						if(slNumber.indexOf(e.target.id)!==-1 &&  e.target.type==="checkbox"){
+
+							firebase.firestore().collection('userMaintenance').where('sl','==',e.target.id).get().then(res =>{
+								var id = res.docs[0].id;
+								console.log(id)
+
+								if(document.getElementById(e.target.id).checked){
+									updateSolved(id,true)
+
+								}
+								else{
+									
+									updateSolved(id,false)
+								}
+
+
+							})
+						}
+
+						
+
+						if(e.target.textContent==="Paid!")
+						{
+							
+							vnNumber = e.target.parentNode.id;
+						}
+
+
+
+					}
+
+
+					async function updateSolved(id,val){
+
+						await firebase.firestore().collection('userMaintenance').doc(id).update({
+							solved:val
+						})
+
+					}
+
+
+
+
+					async function payRent(){
+						if(document.getElementById('amountPaid').value===""){
+							alert('Enter Amount')
+							return;
+						}
+						var paidDate = document.getElementById('datePaid').value; 
+
+						var myFirebaseFirestoreTimestampFromDate = firebase.firestore.Timestamp.fromDate(new Date());
+
+						var totalamt;
+						await firebase.firestore().collection('rentDue').doc(userID).get().then(res =>{
+							totalamt = res.data().total
+						})
+
+						await firebase.firestore().collection('rentPaid').doc(userID).get().then(res =>{
+							if(res.exists)
+							{
+								firebase.firestore().collection('rentPaid').doc(userID).update({
+									paid:firebase.firestore.FieldValue.arrayUnion({
+										amount:document.getElementById('amountPaid').value,
+										total:document.getElementById('amountPaid').value,
+										vn: vnNumber,
+										date: firebase.firestore.Timestamp.fromDate(new Date(paidDate)),
+										mode: document.getElementById('paymedium').value,
+										month: myFirebaseFirestoreTimestampFromDate.toDate().toString().substring(4,7).toUpperCase()
+
+									})
+								})
+								console.log('Done')
+
+							}else{
+								firebase.firestore().collection('rentPaid').doc(userID).set({
+
+									paid:firebase.firestore.FieldValue.arrayUnion({
+										amount:document.getElementById('amountPaid').value,
+										total:document.getElementById('amountPaid').value,
+										vn: vnNumber,
+										date: firebase.firestore.Timestamp.fromDate(new Date(paidDate)),
+										mode: document.getElementById('paymedium').value,
+										month: myFirebaseFirestoreTimestampFromDate.toDate().toString().substring(4,7).toUpperCase()
+									})
+								})
+
+								console.log('Done')
+							}
+
+						})
+
+						var due = dueRentArr.filter( el => el.vn !== vnNumber.toString());
+
+						await firebase.firestore().collection('rentDue').doc(userID).update({
+							due: firebase.firestore.FieldValue.delete()
+						})
+
+
+
+
+						for(let i=0; i<due.length; i++){
+
+							await firebase.firestore().collection('rentDue').doc(userID).get().then(res =>{
+								if(res.exists)
+								{
+									firebase.firestore().collection('rentDue').doc(userID).update({
+										due:firebase.firestore.FieldValue.arrayUnion({
+											amount: due[i].amount,
+											total: due[i].total,
+											month: due[i].month,
+											lastDate: due[i].lastDate.toDate(),
+											name:due[i].name,
+											vn:due[i].vn
+										})
+									})
+									firebase.firestore().collection('rentDue').doc(userID).update({
+										total:document.getElementById('amtDue').value
+									})
+
+								}else{
+									firebase.firestore().collection('rentDue').doc(userID).set({
+										due:firebase.firestore.FieldValue.arrayUnion({
+											amount: due[i].amount,
+											total: due[i].total,
+											month: due[i].month,
+											lastDate: due[i].lastDate.toDate(),
+											name:due[i].name,
+											vn:due[i].vn
+										})
+									})
+								}
+
+
+							})
+
+						}
+
+						
+						firebase.firestore().collection('rentDue').doc(userID).update({
+							total : totalamt
+						})
+
+
+
+						console.log(due)
+
+						alert('Updated')
+
+
+
+					}
+
+
+
+
+					async function submitDue(){
+
+						if(document.getElementById('amtDue').value==="" && document.getElementById('lastDueDate').value==="" ){
+							alert('Invalid Entry')
+							return;
+						}
+
+						var myFirebaseFirestoreTimestampFromDate = firebase.firestore.Timestamp.fromDate(new Date(document.getElementById('lastDueDate').value.toString()));
+						let lastDate = myFirebaseFirestoreTimestampFromDate.toDate()
+						let name = "";
+						let phone = "";
+
+						await firebase.firestore().collection('userProfile').doc(userID).get().then( res =>{
+							name = res.data().name;
+							phone = res.data().personal.mobile
+						})
+
+
+
+						firebase.firestore().collection('rentDue').doc(userID).get().then(res =>{
+							if(res.exists)
+							{
+								firebase.firestore().collection('rentDue').doc(userID).update({
+									due:firebase.firestore.FieldValue.arrayUnion({
+										amount:document.getElementById('amtDue').value,
+										total:document.getElementById('amtDue').value,
+										month: lastDate.toString().substring(4, 7).toUpperCase(),
+										lastDate: lastDate,
+										name:name,
+										vn:"RLLVNSO"+ Math.floor(Math.random()*10000000).toString()
+									})
+								})
+								firebase.firestore().collection('rentDue').doc(userID).update({
+									total:document.getElementById('amtDue').value
+								})
+
+								// var msg = `
+
+								// Your rent for this month is due Rs.${  document.getElementById('amtDue').value }
+								// Please pay before 5th of ${ lastDate.toString().substring(4, 7) }
+								// To avoid late fine fees
+								// Please ignore if already paid.
+
+								// `
+								// if(phone!=="")
+								// 	sendSMS(phone,msg)
+
+
+
+							}else{
+								firebase.firestore().collection('rentDue').doc(userID).set({
+									due:firebase.firestore.FieldValue.arrayUnion({
+										amount:document.getElementById('amtDue').value,
+										total:document.getElementById('amtDue').value,
+										month: lastDate.toString().substring(4, 7).toUpperCase(),
+										lastDate: lastDate,
+										name:name,
+										vn:"RLLVNSO"+ Math.floor(Math.random()*10000000).toString()
+									})
+								})
+
+								firebase.firestore().collection('rentDue').doc(userID).update({
+									total:document.getElementById('amtDue').value
+								})
+
+
+								// var msg = `
+
+								// Your rent for this month is due Rs.${  document.getElementById('amtDue').value+" " } Please pay before 5th of ${ lastDate.toString().substring(4, 7) } To avoid late fine fees, Please ignore if already paid.
+
+								// `
+								// if(phone!=="" && phone!=undefined)
+								// 	sendSMS(phone,msg)
+
+							}
+
+							alert("Updated")
+
+						})
+
+
+					}
+				</script>
+
+
+
+
+
+
+
+
+
+				<script>
+					firebase.firestore().collection('userProfile').doc(userID).get().then(res =>{
+
+						document.getElementById('user-name').value = res.data().name;
+						document.getElementById('user-email').value = res.data().email;
+
+						document.getElementById('user-name').value = res.data().personal.name;
+						document.getElementById('user-email').value = res.data().personal.email
+						document.getElementById('user-mobile').value = res.data().personal.mobile
+
+						if(res.data().personal.gender === 'Male' )
+							document.getElementById('defaultGroupExample1').checked=true;
+						if(res.data().personal.gender === 'Female' )
+							document.getElementById('defaultGroupExample2').checked=true;
+						if(res.data().personal.gender === 'Other' )
+							document.getElementById('defaultGroupExample3').checked=true;
+
+						if(res.data().personal.maritalStatus === "Unmarried" )
+							document.getElementById('defaultGroupExample4').checked=true;
+						if(res.data().personal.maritalStatus === "Married" )
+							document.getElementById('defaultGroupExample5').checked=true;
+
+						document.getElementById('birth-date').value = res.data().personal.DOB;
+
+						if(res.data().professional.employment === 'Student')
+							document.getElementById('Example1').checked = true;
+						if(res.data().professional.employment === 'Employed')
+							document.getElementById('Example2').checked = true;
+						if(res.data().professional.employment === 'Self Employed')
+							document.getElementById('Example3').checked = true;
+
+						document.getElementById('employer-name').value = res.data().professional.employerName;
+
+						if(res.data().professional.qualification==="10th")
+							document.getElementById('quali1').checked = true;
+						if(res.data().professional.qualification==="12th")
+							document.getElementById('quali2').checked = true;
+						if(res.data().professional.qualification==="UG")
+							document.getElementById('quali3').checked = true;
+						if(res.data().professional.qualification==="PG")
+							document.getElementById('quali4').checked = true;
+						if(res.data().professional.qualification==="Phd")
+							document.getElementById('quali5').checked = true;
+
+						document.getElementById('employer-mobile').value = res.data().professional.officeMobile
+						document.getElementById('employer-email').value = res.data().professional.officeEmail
+
+						document.getElementById('emer-address').value = res.data().contact.emergencyAddress
+						document.getElementById('emer-phone').value = res.data().contact.emergencyMobile
+						document.getElementById('emer-g-name').value = res.data().contact.emergencyGardian
+
+						document.getElementById('ac-name').value = res.data().bank.accHolderName
+						document.getElementById('ac-num').value = res.data().bank.accNumber
+						document.getElementById('branch-name').value = res.data().bank.branchName
+						document.getElementById('ifsc').value = res.data().bank.ifsc;
+
+					}).catch(err =>{
+						console.log(err);
+					})
+
+					showPersonal(); // to show personal;
+					showImage(); // to show user Image;
+
+					var img;
+					async function showImage(){
+						await firebase.firestore().collection('userProfile').doc(userID).get().then(res =>{
+							if(res.data().personal === undefined){
+								if((/@/).test(userID)){
+									img = "https://img.favpng.com/21/13/5/user-profile-default-computer-icons-network-video-recorder-png-favpng-7dPZA8WRdY80Uw3bdMWkEN4fR.jpg";
+									document.getElementById('profilePic').src = img;
+									
+								}
+								else{
+									img = res.data().image;
+									document.getElementById('profilePic').src = img
+									
+								}
+							}
+							else{
+								if((/@/).test(userID)){
+									getImage();  
+								}else{
+									img = res.data().image;
+									document.getElementById('profilePic').src = img;
+									
+								}
+							}
+						})
+
+						async function getImage(){ // to get image from storage
+							await firebase.storage().ref("userImage/"+userID).getDownloadURL().then(url =>{
+								img =  url;
+								document.getElementById('profilePic').src = img
+
+							});
+						}
+					}
+				</script>
+
+			</body>
+			<style type="text/css" media="screen">
+				@import url('https://fonts.googleapis.com/css?family=Montserrat');
+				a{
+					cursor: pointer;
+				}
+				.switch {
+					position: relative;
+					display: inline-block;
+					width: 50px;
+					height: 23px;
+				}
+
+				.switch input { 
+					opacity: 0;
+					width: 0;
+					height: 0;
+				}
+
+				.slider {
+					position: absolute;
+					cursor: pointer;
+					top: 0;
+					left: 0;
+					right: 0;
+					bottom: 0;
+					background-color: #ccc;
+					-webkit-transition: .4s;
+					transition: .4s;
+				}
+
+				.slider:before {
+					position: absolute;
+					content: "";
+					height: 15px;
+					width: 15px;
+					left: 4px;
+					bottom: 4px;
+					background-color: white;
+					-webkit-transition: .4s;
+					transition: .4s;
+				}
+
+				input:checked + .slider {
+					background-color: #2196F3;
+				}
+
+				input:focus + .slider {
+					box-shadow: 0 0 1px #2196F3;
+				}
+
+				input:checked + .slider:before {
+					-webkit-transform: translateX(26px);
+					-ms-transform: translateX(26px);
+					transform: translateX(26px);
+				}
+				button:active{
+					transition: all ease 0.2s;
+					-webkit-transform: translate(0.98);
+					-moz-transform: translate(0.98);
+					-ms-transform: translate(0.98);
+					-o-transform: translate(0.98);
+					transform: translate(0.98);
+				}
+			</style>
+
+			</html>

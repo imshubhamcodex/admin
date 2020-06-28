@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Rent Collection</title>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+
+
+
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.6/css/all.css">
+
+	<!-- firebase -->
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-storage.js"></script>
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyBv8smcSq6KUFImtYKIAWWZ0PgE3FDqS3s",
+			authDomain: "dev-roomlelo.firebaseapp.com",
+			databaseURL: "https://dev-roomlelo.firebaseio.com",
+			projectId: "dev-roomlelo",
+			storageBucket: "dev-roomlelo.appspot.com",
+			messagingSenderId: "450187201766",
+			appId: "1:450187201766:web:9a14dcd60b4b5101e93f27"
+		};
+		firebase.initializeApp(firebaseConfig);
+	</script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-dark bg-primary text-center" style="margin-bottom: 20px;">
+		<p class="navbar-brand " style="font-size: 2.0rem; margin:0 auto;"><i class="fa fa-cog" aria-hidden="true"></i> Roomlelo Admin site</p>
+	</nav>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-2">
+				<ul class="list-group" style="font-size: 15px;">
+					<a  style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="userList.html" >Users List</a>
+					<a  id="btnserviceReq" style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item"                     href="serviceRequest.html" >Services Requests</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="rentDue.html">Rent Due List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active" onclick="location.reload()">Rent Collection List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="securityDeposite.html">Security Deposite</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item  " href="bookProperty.html">Book Property</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " href="reservationDetails.html">Reservation Details</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item  " href="createID.html">Create PM Id's</a>
+				</ul>
+			</div>
+			<div class="col-9"  style="font-size: 15px;margin:0 auto;" >
+				<div class="input-group">
+					<div class="input-group-prepend" >
+						<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">Start Date</span>
+					</div>
+					<input type="date" id="startDate"  class="form-control" id="datePaid" required style="height:34px;font-size: 12px;">
+				</div>
+				<br>
+				<div class="input-group">
+					<div class="input-group-prepend" >
+						<span class="input-group-text" id="inputGroupPrepend" style="font-size: 13px;">End Date</span>
+					</div>
+					<input type="date"  id="endDate" class="form-control" id="datePaid" required style="height:34px;font-size: 12px;">
+				</div>
+				<br>
+				<button class="btn btn-info" onclick="show()" style="float:right;">Click</button>
+				<h3 id="Total" style="margin:0 auto;text-align: center;font-family: Montserrat;font-weight: bold; color:green; "></h3>
+				<br>
+				<div id="paidData">
+					
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<script>
+		var userid = [];
+		var gotElement = [];
+		var total = 0
+		async function show(){
+			gotElement = [];
+			userid = [];
+			total = 0;
+
+			if(document.getElementById('startDate').value==="" || document.getElementById('endDate').value===""){
+				alert('Enter Valid Date')
+				return;
+			}
+
+			var start = document.getElementById('startDate').value;
+			var end = document.getElementById('endDate').value;
+
+			var startDateSec = firebase.firestore.Timestamp.fromDate(new Date(start)).seconds;
+			var endDateSec = firebase.firestore.Timestamp.fromDate(new Date(end)).seconds;
+
+			
+
+			await firebase.firestore().collection('rentPaid').get().then(res=>{
+				res.docs.forEach(function(element, index) {
+					userid.push(element.id)
+				});
+			})
+			
+
+			for(let i=0;i<userid.length;i++){
+
+				await firebase.firestore().collection('rentPaid').doc(userid[i]).get().then(res=>{
+					res.data().paid.forEach( function(element, index) {
+
+						console.log(element.date.seconds)
+						if(element.date.seconds >= startDateSec && element.date.seconds <= endDateSec){
+
+							gotElement.push(element)
+							total += Number(element.total);
+							document.getElementById('Total').textContent = "Total Collection: ₹  " + total 
+						}
+					});
+				})
+
+			}
+
+			console.log(gotElement)
+			gotElement.sort(function(a,b){ return Number(b.date.seconds) - Number(a.date.seconds)});
+
+			gotElement.forEach((element, index) => {
+				
+				var newEle =`
+				<div style="width:95%;height:105px;background-color:white;border-radius:0px;border:1px solid #ddd;box-shadow:0px 2px 5px rgba(0,0,0,0.6);margin:12px auto;position:relative;">
+				<div style="border-left: 2px solid rgb(219, 219, 219);height:53px;position:absolute;top:50%;margin-left:30px;transform:translate(0%,-50%)"></div>
+
+				<span style="color:black; font-size:13px; width:100%; height:24px; background:rgb(211, 211, 211); display:block;box-shadow:0px 2px 2px rgba(0,0,0,0.7);"><span style="margin-left:12px;font-family:Montserrat;font-weight:600;font-size:15px;">Invoice No.: </span><span style="color:#3fb6c6;font-family:Montserrat;font-weight:600;font-size:15px;">${element.vn}</span></span> 
+				<h6 style="margin-left:40px;margin-top:14px;font-family:Montserrat;font-weight:700"><i class="fa fa-circle-o" aria-hidden="true" style="position:absolute;margin-left:-16px;color:#3fb6c6;background-color:white;"></i>Rent ${element.month} <span style="float:right;margin-right:10px;"> ₹ ${element.amount}</span></h6>
+				<p style="margin-top:-7px;margin-left:40px;font-size:13px;position:relative;"><span style="font-family:Montserrat;"> Paid on ${element.date.toDate()}</span></p>
+				<hr style="margin-top:-5px;margin-bottom:0;">
+				<p style="margin-left:15px; font-family:Montserrat;font-weight:600; font-size:15px;">Total: ₹ ${element.total}<span style="float:right;margin-right:10px;" id="${element.vn}view"></span></p>
+				</div>
+				`
+				document.getElementById('paidData').innerHTML += newEle;
+			});
+
+			
+
+		}
+		
+	</script>
+
+
+
+</body>
+<style type="text/css" media="screen">
+	@import url('https://fonts.googleapis.com/css?family=Montserrat');
+</style>
+</html>

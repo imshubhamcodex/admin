@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Invoice</title>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-storage.js"></script>
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyBv8smcSq6KUFImtYKIAWWZ0PgE3FDqS3s",
+			authDomain: "dev-roomlelo.firebaseapp.com",
+			databaseURL: "https://dev-roomlelo.firebaseio.com",
+			projectId: "dev-roomlelo",
+			storageBucket: "dev-roomlelo.appspot.com",
+			messagingSenderId: "450187201766",
+			appId: "1:450187201766:web:9a14dcd60b4b5101e93f27"
+		};
+		firebase.initializeApp(firebaseConfig);
+	</script>
+</head>
+<body>
+	<div style="background:rgba(0,0,0,0.07);">
+		<section style="background:white;max-width:800px;margin-top:0;padding-top:0;margin:10px auto;font-family:'Exo', sans-serif; box-shadow:0px 2px 5px rgba(0,0,0,0.6)" id="print" >
+			<img src="../rll.png" style="width:530px;margin:0 0; display:block;" alt="">
+			<h5 style="margin-left:25px;font-weight:900;color:black">PAYMENT RECEIPT <button style="float:right;margin-right:25px;color:#3fb6c6;border:2px solid #3fb6c6;background:none;font-family:Montserrat;font-weight:700;font-size:17px;">PAID</button></h5>
+			<hr style="margin-left:25px;margin-right:25px;border:1px solid grey;">
+			<h6 style="margin-top:30px;;margin-left:25px;color:#3fb6c6;font-weight:700;" >HOUSE DETAILS</h6>
+			
+			<table style="width:100%;margin-left:25px;">
+				<tbody>
+					<tr style="">
+						<td  style="padding-top:20px;"><span style="font-weight:700;">Owner</span> <span style="margin-left:40px;">:</span> <span style="margin-left:30px;" id="ownerName" ></span></td>
+						<td  style="padding-top:20px;"><span style="font-weight:700;">Receipt #</span> <span style="margin-left:50px;">:</span> <span style="margin-left:30px;" id="reciptId" ></span></td>
+					</tr>
+					<tr>
+						<td  style="padding-top:20px;"><span style="font-weight:700;">Contact</span> <span style="margin-left:32px;">:</span> <span style="margin-left:30px;" id="ownerContact"></span></td>
+						<td  style="padding-top:20px;"><span style="font-weight:700;">Receipt Date</span> <span style="margin-left:27px;">:</span> <span style="margin-left:30px;" id="reciptDate" ></span></td>
+					</tr>
+					<tr style="padding-top:25px;">
+						<td  style="padding-top:20px;"><span style="font-weight:700;">House ID</span> <span style="margin-left:23px;">:</span> <span style="margin-left:30px;" id="houseId" ></span></td>
+						<td  style="padding-top:20px;"><span style="font-weight:700;">Due Date</span> <span style="margin-left:53px;">:</span> <span style="margin-left:30px;" id="dueDate"></span></td>
+					</tr>
+				</tbody>
+			</table>
+			<hr style="margin-bottom:0;margin-left:25px;margin-right:25px;border:1px solid grey;">
+			<h6 style="margin-top:30px;;margin-left:25px;color:#3fb6c6;font-weight:700;" >TENANT DETAILS</h6>
+
+			<ul style="margin-left:25px;padding:0;margin-top:20px;">
+				<li style="display:block;padding-bottom:20px;">
+					<span style="font-weight:700;">Tenants</span> <span style="margin-left:30px;">:</span> <span style="margin-left:30px;" id="tenants"></span>
+				</li>
+				<li style="display:block;padding-bottom:20px;">
+					<span style="font-weight:700;">Address</span> <span style="margin-left:30px;">:</span> <span style="margin-left:30px;" id="tenantsAddress"></span>
+				</li>
+				<br>
+				<li style="display:block;padding-bottom:20px;">
+					<span style="font-weight:700;">Email</span> <span style="margin-left:48px;">:</span> <span style="margin-left:30px;" id="tenantsEmail"></span>
+				</li>
+				<li style="display:block;">
+					<span style="font-weight:700;">Contact</span> <span style="margin-left:33px;">:</span> <span style="margin-left:30px;" id="tenantsContact"></span>
+				</li>
+			</ul>
+			<hr style="margin-left:25px;margin-right:25px;border:1px solid grey;">
+			<h6 style="margin-top:30px;margin-left:25px;;color:#3fb6c6;font-weight:700;margin-bottom:20px;" >DESCRIPTION</h6>
+			<p style="margin-left:25px;font-weight:700; font-size:15px;" id="des"></p>
+			<p  style="margin-left:25px;font-weight:700;font-size:15px;" id="payMode"></p>
+			<br>
+			<br>
+			<div style="background-color:rgba(169,169,169,0.5);height:30px;">
+				<p style="margin-left:25px;font-weight:700;padding-top:5px;">Total Rs: <span style=" float:right;margin-right:125px " id="amt"></span></p>
+			</div>
+			<br>
+			<p  style="margin-left:25px;font-weight:500;padding-top:5px;color:rgba(169,169,169,0.8);font-size:15px">This is system generated report.No signature is requried</p>
+			<button @click="print()" id="print-btn" onclick="window.print()" style="color:white;background:black;width:150px;height:35px;border:0;outline:0;float:right;margin-right:25px;">Print</button>
+			<br>
+			<br>
+			<br>
+		</section>
+	</div>
+
+	<script>
+		var ownerId,
+		ownerName,
+		ownerContact,
+		houseId,
+		reciptId,
+		reciptDate,
+		dueDate,
+		tenants,
+		tenantsAddress,
+		tenantsEmail,
+		tenantsContact,
+		amount,
+		invoiceNumber,
+		userID,
+		lastDate,
+		rentMonth,
+		payMode;
+
+
+		var invoiceNumber = localStorage.getItem("invoiceNumber");
+		var userID = localStorage.getItem("userQueryID")
+		window.onload = async function(){
+			if(invoiceNumber!==undefined){
+			// get paid amount and details
+			firebase.firestore().collection('rentPaid').doc(userID).get().then(res =>{
+				res.data().paid.forEach((element) => {
+					if(invoiceNumber === element.vn ){
+						document.getElementById('reciptId').textContent = element.vn;
+						document.getElementById('reciptDate').textContent = firebase.firestore.Timestamp.fromDate(new Date()).toDate().toString().substring(0,10);
+						document.getElementById('dueDate').textContent = element.date.toDate().toString().substring(0,10);
+
+						if(element.date.toDate().toString().charAt(9)=='1')
+							dueDate += "st";
+						else if(element.date.toDate().toString().charAt(9)=='2')
+							dueDate += "nd";
+						else if(element.date.toDate().toString().charAt(9)=='3')
+							dueDate += "rd";
+						else
+							dueDate += "th";
+
+						reciptDate += dueDate.substring(10,12);
+
+						// setting next month of payment
+						var d = new Date(element.date.toDate().toString());
+						var mlist = [ "Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec" ];
+
+						lastDate = dueDate.substring(0,4) + mlist[d.getMonth() + 1] + dueDate.substring(7,dueDate.length);
+						rentMonth = element.month;
+
+
+						amount =  element.amount;
+						document.getElementById('payMode').textContent = "Payment Mode "+element.mode;
+
+						document.getElementById('des').innerHTML = `
+							RENT_ ${rentMonth} <span style="float:right;margin-right:125px">₹ ${amount}/-</span>
+						`
+						document.getElementById('amt').textContent = "₹ "+ amount;
+						
+					}
+				});
+				
+			}).catch( err =>{
+				console.log(err)
+			})
+
+
+			// to get all ID
+			await firebase.firestore().collection('registeredUser').doc(userID).get().then(res =>{
+				document.getElementById('houseId').textContent =  res.data().propertyId;
+				ownerId = res.data().ownerId;
+			}).catch( err =>{
+				console.log(err)
+			})
+
+
+			firebase.firestore().collection('ownerProfile').doc(ownerId).get().then( res =>{
+				document.getElementById('ownerName').textContent = res.data().name;
+				document.getElementById('ownerContact').textContent = res.data().phone;
+
+			}).catch( err =>{
+				console.log(err)
+			})
+
+			firebase.firestore().collection('userProfile').doc(userID).get().then(res =>{
+				document.getElementById('tenants').textContent = res.data().personal.name;
+				document.getElementById('tenantsContact').textContent  = res.data().personal.mobile;
+				document.getElementById('tenantsEmail').textContent = res.data().personal.email;
+				document.getElementById('tenantsAddress').textContent = res.data().contact.emergencyAddress;
+				
+				
+				
+
+			})
+
+
+
+		}
+	}
+
+</script>
+</body>
+</html>

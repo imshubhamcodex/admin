@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Service Requests</title>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.6/css/all.css">
+
+	<!-- firebase -->
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-storage.js"></script>
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyBv8smcSq6KUFImtYKIAWWZ0PgE3FDqS3s",
+			authDomain: "dev-roomlelo.firebaseapp.com",
+			databaseURL: "https://dev-roomlelo.firebaseio.com",
+			projectId: "dev-roomlelo",
+			storageBucket: "dev-roomlelo.appspot.com",
+			messagingSenderId: "450187201766",
+			appId: "1:450187201766:web:9a14dcd60b4b5101e93f27"
+		};
+		firebase.initializeApp(firebaseConfig);
+	</script>
+	<script>
+		var userID = localStorage.getItem("userQueryID")
+	</script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-dark bg-primary text-center" style="margin-bottom: 20px;">
+		<p class="navbar-brand " style="font-size: 2.0rem; margin:0 auto;"><i class="fa fa-cog" aria-hidden="true"></i> Roomlelo Admin site</p>
+	</nav>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-2">
+				<ul class="list-group" style="font-size: 15px;">
+					<a  style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="userList.html" >Users List</a>
+					<a  id="btnserviceReq" style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item active" onclick="location.reload()">Services Requests</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="rentDue.html">Rent Due List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="rentCollection.html">Rent Collection List</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item" href="securityDeposite.html">Security Deposite</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item  " href="bookProperty.html">Book Property</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item " href="reservationDetails.html">Reservation Details</a>
+					<a style="margin-bottom: 20px; outline: 0px;border:0;" class="list-group-item  " href="createID.html">Create PM Id's</a>
+				</ul>
+			</div>
+			<div class="col-9"  style="font-size: 15px;margin:0 auto;" >
+				<div id="requests">
+					<div id="status_div">
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+
+
+
+	<script>
+		var slNumber = [];
+		async function showRequests(){
+			var arrSolved = [];
+			var arrUnsolved = [];
+			slNumber = [];
+			var arrIds = []; // id of all maintan requests
+			var arrUserID = [] // users id
+			var propID = [];//property id
+			var pmData =[]; //property manager data
+
+			document.getElementById('status_div').innerHTML = ``
+
+
+			await firebase.firestore().collection('userRequests').get().then(res=>{
+				res.docs.forEach( function(element, index) {
+					arrUserID.push(element.id)
+				});
+			})
+
+			for(let i = 0; i < arrUserID.length; i++){
+
+				await firebase.firestore().collection('registeredUser').doc(arrUserID[i]).get().then(res =>{
+					propID.push(res.data().propertyId);
+				})
+
+			}
+
+			for(let i= 0;i<propID.length;i++){
+
+				await firebase.firestore().collection('propertyManager').doc(propID[i]).get().then(res =>{
+					pmData.push(res.data())
+				})
+			}
+
+			for(let i=0;i<arrUserID.length;i++){
+
+				await firebase.firestore().collection('userRequests').doc(arrUserID[i]).get().then(res =>{
+					if(res.exists){
+						res.data().id.forEach( function(element) {
+							var x ={
+								reqId:element,
+								uid:arrUserID[i],
+								prop:propID[i],
+								pm:pmData[i]
+							}
+							arrIds.push(x);  // make it a objet that store uid prop id and pm details
+						});
+					}
+
+				}).catch(err =>{
+					console.log(err)
+				})
+
+			}
+
+
+
+			for(let i =0;i<arrIds.length ;i++){  // get all data of Maintenance
+				await firebase.firestore().collection('userMaintenance').doc(arrIds[i].reqId).get().then(res =>{
+					var x = {
+						sec:res.data().date.seconds,
+						service:res.data().service,
+						sl:res.data().sl,
+						date:res.data().date.toDate().toString().substring(0,10),
+						solved : res.data().solved,
+						issue: res.data().issue,
+						visitDate :res.data().visitDate,
+						visitTime : res.data().visitTime,
+						des :res.data().description,
+						photo: res.data().photo,
+						uid:arrIds[i].uid,
+						propId:arrIds[i].prop,
+						pmname: arrIds[i].pm.name,
+						pmmobile: arrIds[i].pm.phoneNumber
+					}
+
+					if(res.data().solved){
+						arrSolved.push(x)
+
+					}else{
+
+						arrUnsolved.push(x)	
+					}
+
+				})
+			}
+
+
+			arrUnsolved.sort(function(a,b){ return Number(b.sec) - Number(a.sec)});
+
+			Array.from(arrUnsolved).forEach(function(element, index) {
+				if(element.date.charAt(9)=='1')
+					element.date += "st";
+				else if(element.date.charAt(9)=='2')
+					element.date += "nd";
+				else if(element.date.charAt(9)=='3')
+					element.date += "rd";
+				else
+					element.date += "th";
+
+				var checked ="";
+				var color ='color:black'
+
+				if(element.solved){
+					checked = "checked";
+					color = 'color:green';
+				}
+				else{
+					checked = " ";
+					color = 'color:red';
+
+				}
+
+
+				var newEle =`
+				<div data-aos="fade-up"  data-aos-offset="120"style="width:95%;height:100%;background-color:white;border-radius:3px;border:1px solid #ddd;box-shadow:0px 2px 5px rgba(0,0,0,0.6);margin:12px auto;padding-top:7px;">
+				<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >UserID : ${element.uid}</p>
+				<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >Property ID : ${element.propId}</p>
+				<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >Property Manager Name : ${element.pmname} </p>
+				<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >Property Manager Phone :  ${element.pmmobile} </p>
+				<span style="color:grey;font-size:13px;margin-left:20px;margin-top:10px;">${element.sl}</span> <span style="float:right;margin-right:20px;color:grey;font-size:13px;margin-top:0px;">${element.date}</span>
+				<h6 style="margin-left:20px;margin-top:7px;font-family:Montserrat;font-weight:700">${element.service}</h6>
+				<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:400">${element.issue}</p>
+				<p style="margin-top:-5px;margin-left:20px;font-size:12px;font-weight:400">${element.des}</p>
+				<span style="margin-top:-5px;margin-right:20px;font-size:12px;font-weight:400;float:right;">Visit Date: ${element.visitDate}</span><span style="margin-top:-5px;margin-left:20px;font-size:12px;font-weight:400;float:right;padding-right:15px;">Visit Time: ${element.visitTime}</span>
+				<p style="margin-top:-5px;padding-left:20px;font-size:13px;font-weight:700"><span style=${color} > Service on progress</span></p>
+				<i id="${element.sl}Photo" style="margin-right:20px;font-size:20px;float:right;" class="fa fa-eye" aria-hidden="true"></i>
+				<label style="margin-top:5px;margin-left:20px;" class="switch">
+				<input type="checkbox" id="${element.sl}" ${checked} >
+				<span class="slider"></span>
+				</label>
+				</div>
+
+
+				`
+				document.getElementById('status_div').innerHTML += newEle
+								slNumber.push(element.sl)  // all serial number array 				
+							});
+
+
+
+			arrSolved.sort(function(a,b){ return Number(b.sec) - Number(a.sec)});
+			Array.from(arrSolved).forEach(function(element, index) {
+
+				if(element.date.charAt(9)=='1')
+					element.date += "st";
+				else if(element.date.charAt(9)=='2')
+					element.date += "nd";
+				else if(element.date.charAt(9)=='3')
+					element.date += "rd";
+				else(element.date.charAt(9)=='0')
+					element.date += "th";
+
+				var checked ="";
+				var color ='color:black'
+
+				if(element.solved){
+					checked = "checked";
+					color = 'color:green';
+				}
+				else{
+					checked = " ";
+					color = 'color:red';
+
+				}
+
+
+				var newEle =`
+				<div data-aos="fade-up"  data-aos-offset="120"style="width:95%;height:100%;background-color:white;border-radius:3px;border:1px solid #ddd;box-shadow:0px 2px 5px rgba(0,0,0,0.6);margin:12px auto;padding-top:7px;">
+				<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >UserID : ${element.uid} </p>
+				<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >Property ID : ${element.propId}</p>
+				<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >Property Manager Name : ${element.pmname} </p>
+				<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:700" >Property Manager Phone :  ${element.pmmobile} </p>
+				<span style="color:grey;font-size:13px;margin-left:20px;margin-top:10px;">${element.sl}</span> <span style="float:right;margin-right:20px;color:grey;font-size:13px;margin-top:0px;">${element.date}</span>
+				<h6 style="margin-left:20px;margin-top:7px;font-family:Montserrat;font-weight:700">${element.service}</h6>
+				<p style="margin-top:-5px;margin-left:20px;font-size:13px;font-weight:400">${element.issue}</p>
+				<p style="margin-top:-5px;margin-left:20px;font-size:12px;font-weight:400">${element.des}</p>
+				<span style="margin-top:-5px;margin-right:20px;font-size:12px;font-weight:400;float:right;">Visit Date: ${element.visitDate}</span><span style="margin-top:-5px;margin-left:20px;font-size:12px;font-weight:400;float:right;padding-right:15px;">Visit Time: ${element.visitTime}</span>
+				<p style="margin-top:-5px;padding-left:20px;font-size:13px;font-weight:700"><span style=${color} > Done!</span></p>
+				<i id="${element.sl}Photo" style="margin-right:20px;font-size:20px;float:right;" class="fa fa-eye" aria-hidden="true"></i>
+				<label style="margin-top:5px;margin-left:20px;" class="switch">
+				<input type="checkbox" id="${element.sl}" ${checked} >
+				<span class="slider"></span>
+				</label>
+				</div>
+
+
+				`
+				document.getElementById('status_div').innerHTML += newEle
+
+				slNumber.push(element.sl)
+			});
+
+			document.getElementById('btnserviceReq').textContent = "Service Requests ("+arrUnsolved.length.toString()+"/"+(arrUnsolved.length+arrSolved.length).toString()+")"
+
+		}
+
+		window.onload = function(){
+			showRequests()
+		}
+		window.onclick = async function(e){
+
+			
+			if(e.target.classList[1]==='fa-eye'){
+
+				var picid = e.target.id.substring(0, e.target.id.length-5);
+				console.log(picid)
+				await firebase.storage().ref("userMaintenanceImage/"+picid).getDownloadURL().then(url =>{
+					window.open(url,"_blank")
+				}).catch(err=>{
+					console.log(err)
+				})
+			}
+
+
+
+			if(slNumber.indexOf(e.target.id)!==-1 &&  e.target.type==="checkbox"){
+
+				firebase.firestore().collection('userMaintenance').where('sl','==',e.target.id).get().then(res =>{
+					var id = res.docs[0].id;
+					console.log(id)
+
+					if(document.getElementById(e.target.id).checked){
+						updateSolved(id,true)
+
+					}
+					else{
+
+						updateSolved(id,false)
+					}
+
+
+				})
+			}
+
+
+
+		}
+
+
+
+		async function updateSolved(id,val){
+
+			await firebase.firestore().collection('userMaintenance').doc(id).update({
+				solved:val
+			})
+
+		}
+	</script>
+
+	<style type="text/css" media="screen">
+		@import url('https://fonts.googleapis.com/css?family=Montserrat');
+		a{
+			cursor: pointer;
+		}
+		.switch {
+			position: relative;
+			display: inline-block;
+			width: 50px;
+			height: 23px;
+		}
+
+		.switch input { 
+			opacity: 0;
+			width: 0;
+			height: 0;
+		}
+
+		.slider {
+			position: absolute;
+			cursor: pointer;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #ccc;
+			-webkit-transition: .4s;
+			transition: .4s;
+		}
+
+		.slider:before {
+			position: absolute;
+			content: "";
+			height: 15px;
+			width: 15px;
+			left: 4px;
+			bottom: 4px;
+			background-color: white;
+			-webkit-transition: .4s;
+			transition: .4s;
+		}
+
+		input:checked + .slider {
+			background-color: #2196F3;
+		}
+
+		input:focus + .slider {
+			box-shadow: 0 0 1px #2196F3;
+		}
+
+		input:checked + .slider:before {
+			-webkit-transform: translateX(26px);
+			-ms-transform: translateX(26px);
+			transform: translateX(26px);
+		}
+		button:active{
+			transition: all ease 0.2s;
+			-webkit-transform: translate(0.98);
+			-moz-transform: translate(0.98);
+			-ms-transform: translate(0.98);
+			-o-transform: translate(0.98);
+			transform: translate(0.98);
+		}
+	</style>
+</body>
+</html>
