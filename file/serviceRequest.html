@@ -94,7 +94,15 @@
 			for(let i = 0; i < arrUserID.length; i++){
 
 				await firebase.firestore().collection('registeredUser').doc(arrUserID[i]).get().then(res =>{
-					propID.push(res.data().propertyId);
+
+					if(res.data()===undefined)
+					{
+
+					}else{
+						propID.push(res.data().propertyId);
+					}
+
+					
 				})
 
 			}
@@ -103,6 +111,7 @@
 
 				await firebase.firestore().collection('propertyManager').doc(propID[i]).get().then(res =>{
 					pmData.push(res.data())
+					console.log(res.data());
 				})
 			}
 
@@ -117,6 +126,7 @@
 								prop:propID[i],
 								pm:pmData[i]
 							}
+
 							arrIds.push(x);  // make it a objet that store uid prop id and pm details
 						});
 					}
@@ -131,6 +141,10 @@
 
 			for(let i =0;i<arrIds.length ;i++){  // get all data of Maintenance
 				await firebase.firestore().collection('userMaintenance').doc(arrIds[i].reqId).get().then(res =>{
+
+					if(res.data()==undefined)
+						return;
+
 					var x = {
 						sec:res.data().date.seconds,
 						service:res.data().service,

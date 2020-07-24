@@ -189,9 +189,17 @@
 			for(let i=0;i<uid.length;i++){
 
 				await firebase.firestore().collection('rentDue').doc(uid[i]).get().then(res =>{
-					(res.data().due).forEach( (ele) => {
 
-						var x = {
+					if(res.data().due!==undefined)
+					{
+
+
+
+						for(let j=0;j<res.data().due.length;j++){
+
+							var ele = res.data().due[j];
+
+							var x = {
 								sec: ele.lastDate.seconds, //second of timestamp
 								amount: ele.amount,
 								total: ele.total,
@@ -202,8 +210,12 @@
 								lastDate: ele.lastDate,
 								userid: uid[i]
 							}
+
 							dueRentArr.push(x);
-						});
+
+						}
+
+					}
 
 				});
 
@@ -323,13 +335,12 @@
 
 			})
 
-			var due =  currentIDArr.filter( el => el.vn !== vnNumber.toString());
+			var due =  currentIDArr.filter( el => el.vn.toString() !== vnNumber.toString());
 
 			await firebase.firestore().collection('rentDue').doc(userID).update({
 				due: firebase.firestore.FieldValue.delete()
 			})
-
-
+			
 
 
 			for(let i=0; i<due.length; i++){
@@ -403,6 +414,8 @@
 			await firebase.firestore().collection('userProfile').doc(userID).get().then( res =>{
 				name = res.data().name;
 				phone = res.data().personal.mobile
+			}).catch(err =>{
+				alert("Please Set user's Mobile number");
 			})
 
 
@@ -426,49 +439,49 @@
 						total:document.getElementById('amtDue').value
 					})
 
-								var msg = `
+					var msg = `
 
-								Your rent for this month is due Rs.${  document.getElementById('amtDue').value }
-								Please pay before 5th of ${ lastDate.toString().substring(4, 7) }
-								To avoid late fine fees
-								Please ignore if already paid.
+					Your rent for this month is due Rs.${  document.getElementById('amtDue').value }
+					Please pay before 5th of ${ lastDate.toString().substring(4, 7) }
+					To avoid late fine fees
+					Please ignore if already paid.
 
-								`
-								if(phone!=="")
-									sendSMS(phone,msg)
-
-
-
-							}else{
-								firebase.firestore().collection('rentDue').doc(userID).set({
-									due:firebase.firestore.FieldValue.arrayUnion({
-										amount:document.getElementById('amtDue').value,
-										total:document.getElementById('amtDue').value,
-										month: lastDate.toString().substring(4, 7).toUpperCase(),
-										lastDate: lastDate,
-										name:name,
-										vn:"RLLVNSO"+ Math.floor(Math.random()*10000000).toString()
-									})
-								})
-
-								firebase.firestore().collection('rentDue').doc(userID).update({
-									total:document.getElementById('amtDue').value
-								})
+					`
+					if(phone!=="")
+						sendSMS(phone,msg)
 
 
-								var msg = `
 
-								Your rent for this month is due Rs.${  document.getElementById('amtDue').value+" " } Please pay before 5th of ${ lastDate.toString().substring(4, 7) } To avoid late fine fees, Please ignore if already paid.
-
-								`
-								if(phone!=="" && phone!=undefined)
-									sendSMS(phone,msg)
-
-							}
-
-							alert("Updated")
-
+				}else{
+					firebase.firestore().collection('rentDue').doc(userID).set({
+						due:firebase.firestore.FieldValue.arrayUnion({
+							amount:document.getElementById('amtDue').value,
+							total:document.getElementById('amtDue').value,
+							month: lastDate.toString().substring(4, 7).toUpperCase(),
+							lastDate: lastDate,
+							name:name,
+							vn:"RLLVNSO"+ Math.floor(Math.random()*10000000).toString()
 						})
+					})
+
+					firebase.firestore().collection('rentDue').doc(userID).update({
+						total:document.getElementById('amtDue').value
+					})
+
+
+					var msg = `
+
+					Your rent for this month is due Rs.${  document.getElementById('amtDue').value+" " } Please pay before 5th of ${ lastDate.toString().substring(4, 7) } To avoid late fine fees, Please ignore if already paid.
+
+					`
+					if(phone!=="" && phone!=undefined)
+						sendSMS(phone,msg)
+
+				}
+
+				alert("Updated")
+
+			})
 
 
 		}

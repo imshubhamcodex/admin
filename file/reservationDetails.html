@@ -168,10 +168,17 @@
 		async function Details(){
 			for(let i = 0;i<userIDs.length;i++){
 				await firebase.firestore().collection('userProfile').doc(userIDs[i]).get().then(res =>{
+					var mobile ="mobile not found";
+
+					if( res.data().personal == undefined){
+						mobile = "Mobile number Not found"
+					}else{
+						mobile =  res.data().personal.mobile;
+					}
 
 					var x = {
-						name: res.data().personal.name,
-						mobile: res.data().personal.mobile,
+						name: res.data().name,
+						mobile:mobile,
 						uid: userIDs[i]
 					}
 
